@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Vector — Step successivi</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; background:#0e0e10; color:#eee; }
+  nav a { color:#3b82f6; margin-right:16px; text-decoration:none; }
+  fieldset { border:1px solid #333; border-radius:8px; margin-bottom:16px; padding:12px 16px; }
+  legend { padding:0 6px; color:#aaa; }
+  select, input[type=text], textarea { width:100%; padding:6px; border-radius:4px; border:1px solid #333; background:#1b1b1f; color:#eee; box-sizing:border-box; font-family:inherit; }
+  textarea { min-height:100px; resize:vertical; }
+  .add-row { display:flex; gap:8px; margin-top:8px; }
+  .add-row input[type=text] { flex:1; }
+  button { padding:8px 14px; background:#3b82f6; color:white; border:none; border-radius:6px; cursor:pointer; }
+  ul { list-style:none; padding:0; margin:16px 0; }
+  li { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #222; }
+  li.done span.text { text-decoration:line-through; color:#666; }
+  li form { margin:0; }
+  li .text { flex:1; }
+  .delete-btn { background:none; border:none; color:#e5484d; font-size:16px; cursor:pointer; padding:0 4px; }
+</style>
+</head>
+<body>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/log">Log</a>
+    <a href="/steps">Step successivi</a>
+  </nav>
+
+  <h1>Step successivi</h1>
+
+  <form method="GET" action="/steps">
+    <label for="project">Progetto</label>
+    <select name="project" id="project" onchange="this.form.submit()">
+      <% projects.forEach(function(p) { %>
+        <option value="<%= p.id %>" <%= p.id === selectedProjectId ? 'selected' : '' %>><%= p.name %></option>
+      <% }); %>
+    </select>
+  </form>
+
+  <ul>
+    <% if (projectSteps.length === 0) { %>
+      <li>Nessuno step ancora per questo progetto.</li>
+    <% } %>
+    <% projectSteps.forEach(function(s) { %>
+      <li class="<%= s.done ? 'done' : '' %>">
+        <form method="POST" action="/steps/<%= s.id %>/toggle">
+          <input type="hidden" name="projectId" value="<%= selectedProjectId %>">
+          <input type="checkbox" onchange="this.form.submit()" <%= s.done ? 'checked' : '' %>>
+        </form>
+        <span class="text"><%= s.text %></span>
+        <form method="POST" action="/steps/<%= s.id %>/delete">
+          <input type="hidden" name="projectId" value="<%= selectedProjectId %>">
+          <button type="submit" class="delete-btn" title="Cancella">&times;</button>
+        </form>
+      </li>
+    <% }); %>
+  </ul>
+
+  <fieldset>
+    <legend>Aggiungi uno step</legend>
+    <form method="POST" action="/steps/add" class="add-row">
+      <input type="hidden" name="projectId" value="<%= selectedProjectId %>">
+      <input type="text" name="text" placeholder="Prossimo step..." required>
+      <button type="submit">+</button>
+    </form>
+  </fieldset>
+
+  <fieldset>
+    <legend>Caricamento massivo</legend>
+    <form method="POST" action="/steps/bulk">
+      <input type="hidden" name="projectId" value="<%= selectedProjectId %>">
+      <textarea name="bulkText" placeholder="Incolla qui più step, uno per riga oppure separati da ';'"></textarea>
+      <div style="margin-top:8px">
+        <button type="submit">Carica step</button>
+      </div>
+    </form>
+  </fieldset>
+
+  <p><a href="/">&larr; torna alla home</a></p>
+</body>
+</html>

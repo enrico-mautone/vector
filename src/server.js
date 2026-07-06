@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 const CONFIG_PATH = path.join(__dirname, '..', 'data', 'config.json');
 const LOG_PATH = path.join(__dirname, '..', 'data', 'log.json');
+const STEPS_PATH = path.join(__dirname, '..', 'data', 'steps.json');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -32,6 +33,19 @@ function daysBetween(earlier, later) {
 
 function getEntry(log, date) {
   return log.find((e) => e.date === date);
+}
+
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// Spezza un testo incollato in step separati: ogni riga E ogni segmento
+// separato da ';' diventa un nuovo step, righe/segmenti vuoti scartati.
+function parseBulkSteps(text) {
+  return text
+    .split(/[\n;]/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 }
 
 // Giorni trascorsi dall'ultimo step registrato come "done" su un progetto,
@@ -135,6 +149,62 @@ app.post('/log', (req, res) => {
   }
   writeJSON(LOG_PATH, log);
   res.redirect('/');
+});
+
+app.get('/steps', (req, res) => {
+  const config = readJSON(CONFIG_PATH);
+  const steps = readJSON(STEPS_PATH);
+  const sortedProjects = config.projects.slice().sort((a, b) => a.priority - b.priority);
+  const selectedProjectId = req.query.project || sortedProjects[0].id;
+  const projectSteps = steps
+    .filter((s) => s.projectId === selectedProjectId)
+    .sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
+
+  res.render('steps', { projects: sortedProjects, selectedProjectId, projectSteps });
+});
+
+app.post('/steps/add', (req, res) => {
+  const { projectId, text } = req.body;
+  if (text && text.trim()) {
+    const steps = readJSON(STEPS_PATH);
+    steps.push({ id: generateId(), projectId, text: text.trim(), done: false, createdAt: new Date().toISOString() });
+    writeJSON(STEPS_PATH, steps);
+  }
+  res.redirect(`/steps?project=${encodeURIComponent(projectId)}`);
+});
+
+app.post('/steps/bulk', (req, res) => {
+  const { projectId, bulkText } = req.body;
+  const newTexts = parseBulkSteps(bulkText || '');
+  if (newTexts.length > 0) {
+    const steps = readJSON(STEPS_PATH);
+    const createdAt = new Date().toISOString();
+    newTexts.forEach((text) => {
+      steps.push({ id: generateId(), projectId, text, done: false, createdAt });
+    });
+    writeJSON(STEPS_PATH, steps);
+  }
+  res.redirect(`/steps?project=${encodeURIComponent(projectId)}`);
+});
+
+app.post('/steps/:id/toggle', (req, res) => {
+  const steps = readJSON(STEPS_PATH);
+  const step = steps.find((s) => s.id === req.params.id);
+  const projectId = step ? step.projectId : req.body.projectId;
+  if (step) {
+    step.done = !step.done;
+    writeJSON(STEPS_PATH, steps);
+  }
+  res.redirect(`/steps?project=${encodeURIComponent(projectId)}`);
+});
+
+app.post('/steps/:id/delete', (req, res) => {
+  const steps = readJSON(STEPS_PATH);
+  const step = steps.find((s) => s.id === req.params.id);
+  const projectId = step ? step.projectId : req.body.projectId;
+  const remaining = steps.filter((s) => s.id !== req.params.id);
+  writeJSON(STEPS_PATH, remaining);
+  res.redirect(`/steps?project=${encodeURIComponent(projectId)}`);
 });
 
 app.listen(PORT, () => {
