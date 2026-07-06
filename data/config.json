@@ -1,0 +1,14 @@
+{
+  "urgencyThresholdDays": 2,
+  "projects": [
+    { "id": "mvp-stories", "name": "MVP Stories", "priority": 1 },
+    { "id": "studio-ai-agentica", "name": "Studio AI Agentica", "priority": 2 },
+    { "id": "personal-branding", "name": "Personal Branding", "priority": 3 },
+    { "id": "shoebox", "name": "ShoeBox", "priority": 4 }
+  ],
+  "habits": [
+    { "id": "porta-avanti-progetti", "name": "Porta avanti i progetti!!" },
+    { "id": "allenamento", "name": "Allenamento" },
+    { "id": "meditazione", "name": "Meditazione" }
+  ]
+}

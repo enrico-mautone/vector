@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Vector</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; background:#0e0e10; color:#eee; }
+  h1 { margin-bottom: 4px; }
+  .today { color:#888; margin-top:0; }
+  .action { padding:12px 16px; border-radius:8px; margin-bottom:8px; background:#1b1b1f; }
+  .action.urgent { border-left:4px solid #e5484d; }
+  .action.normal { border-left:4px solid #3b82f6; }
+  .habit { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #222; }
+  .streak { color:#f5a623; }
+  a.button { display:inline-block; margin-top:20px; padding:10px 16px; background:#3b82f6; color:white; text-decoration:none; border-radius:6px; }
+  .empty { color:#4ade80; }
+</style>
+</head>
+<body>
+  <h1>Vector</h1>
+  <p class="today"><%= today %></p>
+
+  <h2>Oggi</h2>
+  <% if (actionsToday.length === 0) { %>
+    <p class="empty">Tutto fatto per oggi.</p>
+  <% } else { %>
+    <% actionsToday.forEach(function(p) { %>
+      <div class="action <%= p.urgent ? 'urgent' : 'normal' %>">
+        <strong><%= p.name %></strong><br>
+        <% if (p.daysSince === null) { %>
+          mai registrato uno step
+        <% } else if (p.daysSince === 0) { %>
+          step fatto oggi
+        <% } else { %>
+          ultimo step <%= p.daysSince %> giorni fa
+        <% } %>
+        <% if (p.urgent) { %> — <strong>urgente</strong><% } %>
+      </div>
+    <% }); %>
+  <% } %>
+
+  <h2>Habit</h2>
+  <% habitsStatus.forEach(function(h) { %>
+    <div class="habit">
+      <span><%= h.doneToday ? '✓' : '○' %> <%= h.name %></span>
+      <span class="streak"><%= h.streak %>&#128293;</span>
+    </div>
+  <% }); %>
+
+  <a class="button" href="/log">Registra la giornata</a>
+</body>
+</html>
