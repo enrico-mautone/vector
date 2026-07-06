@@ -39,6 +39,129 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
+function pad2(n) {
+  return n < 10 ? '0' + n : '' + n;
+}
+
+function ymd(d) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function daysInMonth(year, monthIndex) {
+  return new Date(year, monthIndex + 1, 0).getDate();
+}
+
+function startOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+const MONTH_NAMES = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+const DAY_NAMES = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+
+function levelFromFraction(done, total) {
+  if (done === 0) return 0;
+  const frac = done / total;
+  if (frac >= 1) return 4;
+  if (frac >= 0.66) return 3;
+  if (frac >= 0.33) return 2;
+  return 1;
+}
+
+function buildHabitDoneMap(config, log) {
+  const map = {};
+  config.habits.forEach((h) => { map[h.id] = new Set(); });
+  log.forEach((entry) => {
+    config.habits.forEach((h) => {
+      if (entry.habits && entry.habits[h.id]) {
+        map[h.id].add(entry.date);
+      }
+    });
+  });
+  return map;
+}
+
+// Vista annuale: una colonna per mese, intensità = frazione di giorni fatti nel mese.
+function buildYearView(habits, habitDoneMap, year) {
+  const columns = MONTH_NAMES.map((name) => ({ label: name }));
+  const rows = habits.map((h) => {
+    const doneDates = habitDoneMap[h.id];
+    const cells = MONTH_NAMES.map((_, monthIdx) => {
+      const total = daysInMonth(year, monthIdx);
+      let done = 0;
+      for (let day = 1; day <= total; day++) {
+        if (doneDates.has(`${year}-${pad2(monthIdx + 1)}-${pad2(day)}`)) done++;
+      }
+      return { level: levelFromFraction(done, total), title: `${done}/${total} giorni` };
+    });
+    return { habit: h, cells };
+  });
+  return { columns, rows };
+}
+
+// Vista mensile: una colonna per settimana del mese, intensità = frazione di
+// giorni (della settimana ricadenti nel mese) fatti.
+function buildMonthView(habits, habitDoneMap, year, month) {
+  const monthIndex = month - 1;
+  const lastDay = new Date(year, monthIndex, daysInMonth(year, monthIndex));
+  const weeks = [];
+  let cursor = startOfWeek(new Date(year, monthIndex, 1));
+  while (cursor <= lastDay) {
+    const weekStart = new Date(cursor);
+    const weekEnd = new Date(cursor);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    weeks.push({ start: weekStart, end: weekEnd });
+    cursor.setDate(cursor.getDate() + 7);
+  }
+  const columns = weeks.map((w) => {
+    const s = w.start.getMonth() === monthIndex ? w.start : new Date(year, monthIndex, 1);
+    const e = w.end.getMonth() === monthIndex ? w.end : lastDay;
+    return { label: `${s.getDate()}-${e.getDate()}` };
+  });
+  const rows = habits.map((h) => {
+    const doneDates = habitDoneMap[h.id];
+    const cells = weeks.map((w) => {
+      let done = 0;
+      let total = 0;
+      const day = new Date(w.start);
+      while (day <= w.end) {
+        if (day.getMonth() === monthIndex) {
+          total++;
+          if (doneDates.has(ymd(day))) done++;
+        }
+        day.setDate(day.getDate() + 1);
+      }
+      return { level: levelFromFraction(done, total || 1), title: `${done}/${total} giorni` };
+    });
+    return { habit: h, cells };
+  });
+  return { columns, rows };
+}
+
+// Vista settimanale: una colonna per giorno (Lun-Dom), fatto/non fatto.
+function buildWeekView(habits, habitDoneMap, weekStart) {
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + i);
+    days.push(d);
+  }
+  const columns = days.map((d, i) => ({ label: `${DAY_NAMES[i]} ${d.getDate()}/${d.getMonth() + 1}` }));
+  const rows = habits.map((h) => {
+    const doneDates = habitDoneMap[h.id];
+    const cells = days.map((d) => {
+      const done = doneDates.has(ymd(d));
+      return { level: done ? 4 : 0, title: ymd(d) };
+    });
+    return { habit: h, cells };
+  });
+  return { columns, rows };
+}
+
 // Spezza un testo incollato in step separati: ogni riga E ogni segmento
 // separato da ';' diventa un nuovo step, righe/segmenti vuoti scartati.
 function parseBulkSteps(text) {
@@ -237,6 +360,51 @@ app.post('/steps/:id/delete', (req, res) => {
   const remaining = steps.filter((s) => s.id !== req.params.id);
   writeJSON(STEPS_PATH, remaining);
   res.redirect(`/steps?project=${encodeURIComponent(projectId)}`);
+});
+
+app.get('/habits', (req, res) => {
+  const config = readJSON(CONFIG_PATH);
+  const log = readJSON(LOG_PATH);
+  const habitDoneMap = buildHabitDoneMap(config, log);
+  const view = req.query.view === 'month' || req.query.view === 'week' ? req.query.view : 'year';
+
+  let extra;
+  if (view === 'year') {
+    const year = parseInt(req.query.year, 10) || new Date().getFullYear();
+    extra = { ...buildYearView(config.habits, habitDoneMap, year), year, prevYear: year - 1, nextYear: year + 1 };
+  } else if (view === 'month') {
+    let year, month;
+    if (req.query.month && /^\d{4}-\d{2}$/.test(req.query.month)) {
+      [year, month] = req.query.month.split('-').map(Number);
+    } else {
+      const now = new Date();
+      year = now.getFullYear();
+      month = now.getMonth() + 1;
+    }
+    const prev = new Date(year, month - 2, 1);
+    const next = new Date(year, month, 1);
+    extra = {
+      ...buildMonthView(config.habits, habitDoneMap, year, month),
+      year,
+      month,
+      prevMonth: `${prev.getFullYear()}-${pad2(prev.getMonth() + 1)}`,
+      nextMonth: `${next.getFullYear()}-${pad2(next.getMonth() + 1)}`,
+    };
+  } else {
+    const refDate = req.query.week && /^\d{4}-\d{2}-\d{2}$/.test(req.query.week) ? new Date(req.query.week) : new Date();
+    const weekStart = startOfWeek(refDate);
+    const prevWeekStart = new Date(weekStart);
+    prevWeekStart.setDate(prevWeekStart.getDate() - 7);
+    const nextWeekStart = new Date(weekStart);
+    nextWeekStart.setDate(nextWeekStart.getDate() + 7);
+    extra = {
+      ...buildWeekView(config.habits, habitDoneMap, weekStart),
+      prevWeek: ymd(prevWeekStart),
+      nextWeek: ymd(nextWeekStart),
+    };
+  }
+
+  res.render('habits', { view, ...extra });
 });
 
 app.listen(PORT, () => {

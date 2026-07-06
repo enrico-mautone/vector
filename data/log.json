@@ -16,7 +16,7 @@
       }
     },
     "habits": {
-      "porta-avanti-progetti": false,
+      "porta-avanti-progetti": true,
       "allenamento": true,
       "meditazione": true
     }
