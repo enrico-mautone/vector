@@ -48,14 +48,20 @@ function parseBulkSteps(text) {
     .filter((s) => s.length > 0);
 }
 
-// Giorni trascorsi dall'ultimo step registrato come "done" su un progetto,
-// scandendo il log a ritroso da `today` (esclusa). null = mai fatto.
+function stepsLoggedToday(todayEntry, projectId) {
+  return (todayEntry.projects[projectId] && todayEntry.projects[projectId].steps) || [];
+}
+
+// Giorni trascorsi dall'ultima volta che almeno uno step di un progetto è
+// stato registrato nel log, scandendo a ritroso da `today` (esclusa).
+// null = mai registrato nessuno step.
 function lastDoneDate(log, projectId, today) {
   const sorted = log
     .filter((e) => e.date <= today)
     .sort((a, b) => (a.date < b.date ? 1 : -1));
   for (const entry of sorted) {
-    if (entry.projects && entry.projects[projectId] && entry.projects[projectId].done) {
+    const steps = entry.projects && entry.projects[projectId] && entry.projects[projectId].steps;
+    if (steps && steps.length > 0) {
       return entry.date;
     }
   }
@@ -89,7 +95,7 @@ app.get('/', (req, res) => {
     .slice()
     .sort((a, b) => a.priority - b.priority)
     .map((p) => {
-      const doneToday = !!(todayEntry.projects[p.id] && todayEntry.projects[p.id].done);
+      const doneToday = stepsLoggedToday(todayEntry, p.id).length > 0;
       const last = lastDoneDate(log, p.id, today);
       const daysSince = last ? daysBetween(last, today) : null;
       const urgent = !doneToday && (daysSince === null || daysSince >= config.urgencyThresholdDays);
@@ -117,23 +123,49 @@ app.get('/', (req, res) => {
 app.get('/log', (req, res) => {
   const config = readJSON(CONFIG_PATH);
   const log = readJSON(LOG_PATH);
+  const steps = readJSON(STEPS_PATH);
   const today = todayStr();
   const todayEntry = getEntry(log, today) || { projects: {}, habits: {} };
-  res.render('log', { config, todayEntry, today });
+
+  const projects = config.projects.map((p) => {
+    const loggedToday = stepsLoggedToday(todayEntry, p.id);
+    const loggedById = new Map(loggedToday.map((s) => [s.stepId, s.minutes]));
+    // Step selezionabili oggi: quelli ancora aperti, più quelli già
+    // registrati oggi (anche se nel frattempo segnati "fatti").
+    const displaySteps = steps
+      .filter((s) => s.projectId === p.id && (!s.done || loggedById.has(s.id)))
+      .map((s) => ({
+        id: s.id,
+        text: s.text,
+        checkedToday: loggedById.has(s.id),
+        minutesToday: loggedById.has(s.id) ? loggedById.get(s.id) : '',
+      }));
+    return { ...p, displaySteps };
+  });
+
+  res.render('log', { projects, config, todayEntry, today });
 });
 
 app.post('/log', (req, res) => {
   const config = readJSON(CONFIG_PATH);
   const log = readJSON(LOG_PATH);
+  const steps = readJSON(STEPS_PATH);
   const today = todayStr();
 
   const projects = {};
   config.projects.forEach((p) => {
-    projects[p.id] = {
-      done: req.body[`project_${p.id}_done`] === 'on',
-      note: req.body[`project_${p.id}_note`] || '',
-    };
+    const projectSteps = steps.filter((s) => s.projectId === p.id);
+    const loggedSteps = [];
+    projectSteps.forEach((s) => {
+      if (req.body[`step_${s.id}_done`] === 'on') {
+        const minutes = parseInt(req.body[`step_${s.id}_minutes`], 10);
+        loggedSteps.push({ stepId: s.id, minutes: Number.isFinite(minutes) ? minutes : 0 });
+        s.done = true;
+      }
+    });
+    projects[p.id] = { steps: loggedSteps };
   });
+  writeJSON(STEPS_PATH, steps);
 
   const habits = {};
   config.habits.forEach((h) => {

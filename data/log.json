@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "date": "2026-07-06",
+    "projects": {
+      "mvp-stories": {
+        "steps": []
+      },
+      "studio-ai-agentica": {
+        "steps": []
+      },
+      "personal-branding": {
+        "steps": []
+      },
+      "shoebox": {
+        "steps": []
+      }
+    },
+    "habits": {
+      "porta-avanti-progetti": false,
+      "allenamento": true,
+      "meditazione": true
+    }
+  }
+]
