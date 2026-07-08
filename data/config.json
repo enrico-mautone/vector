@@ -21,6 +21,11 @@
       "id": "shoebox",
       "name": "ShoeBox",
       "priority": 4
+    },
+    {
+      "id": "vector",
+      "name": "Vector",
+      "priority": 5
     }
   ],
   "habits": [
