@@ -67,7 +67,10 @@
                 <span><span class="label">Prossimo:</span> <span class="step-text"><%= p.nextStepText %></span></span>
               </label>
             <% } else { %>
-              <span class="no-step">nessuno step aperto</span>
+              <label class="next-step finish-project">
+                <input type="checkbox" class="finish-checkbox" data-project="<%= p.id %>">
+                <span class="no-step">Non ci sono più task, il progetto è terminato?</span>
+              </label>
             <% } %>
           </span>
           <% if (p.urgent) { %> — <strong>urgente</strong><% } %>
@@ -106,6 +109,8 @@
       document.body.addEventListener('change', function (e) {
         if (e.target.classList.contains('step-checkbox')) {
           onStepChecked(e.target);
+        } else if (e.target.classList.contains('finish-checkbox')) {
+          onFinishProjectChecked(e.target);
         } else if (e.target.classList.contains('habit-checkbox')) {
           onHabitToggled(e.target);
         }
@@ -138,9 +143,41 @@
                 '</label>';
               slot.querySelector('.step-text').textContent = res.data.nextStepText;
             } else {
-              slot.innerHTML = '<span class="no-step">nessuno step aperto</span>';
+              slot.innerHTML =
+                '<label class="next-step finish-project">' +
+                '<input type="checkbox" class="finish-checkbox" data-project="' + projectId + '">' +
+                '<span class="no-step">Non ci sono più task, il progetto è terminato?</span>' +
+                '</label>';
             }
             showToast('Ben fatto continua così!! +10pt', false);
+          })
+          .catch(function () {
+            checkbox.checked = false;
+            checkbox.disabled = false;
+            showToast('Errore di rete, riprova.', true);
+          });
+      }
+
+      function onFinishProjectChecked(checkbox) {
+        if (!checkbox.checked) return;
+        var projectId = checkbox.dataset.project;
+        checkbox.disabled = true;
+        fetch('/home/finish-project', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId: projectId }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (!data.ok) {
+              checkbox.checked = false;
+              checkbox.disabled = false;
+              showToast(data.error || 'Non registrato.', true);
+              return;
+            }
+            var row = document.querySelector('.action-row[data-project-row="' + projectId + '"]');
+            if (row) row.remove();
+            showToast('Progetto archiviato.', false);
           })
           .catch(function () {
             checkbox.checked = false;

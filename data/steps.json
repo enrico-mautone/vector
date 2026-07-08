@@ -147,10 +147,45 @@
     "createdAt": "2026-07-06T17:01:16.157Z"
   },
   {
-    "id": "mr9gw0fh86d3p",
+    "id": "mrc56kl3j7bry",
     "projectId": "mvp-stories",
-    "text": "Pianificare gli step (10min)",
+    "text": "Fork & setup Hermes Agent",
     "done": false,
-    "createdAt": "2026-07-06T17:01:36.173Z"
+    "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mrc56kl3z8ngz",
+    "projectId": "mvp-stories",
+    "text": "Login anziano",
+    "done": false,
+    "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mrc56kl3alt2q",
+    "projectId": "mvp-stories",
+    "text": "Partizionamento memoria per account",
+    "done": false,
+    "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mrc56kl317hmi",
+    "projectId": "mvp-stories",
+    "text": "Pipeline vocale (STT + TTS)",
+    "done": false,
+    "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mrc56kl33nyur",
+    "projectId": "mvp-stories",
+    "text": "Elaborazione messaggi via LLM (OpenRouter/Groq)",
+    "done": false,
+    "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mrc56kl3h7wke",
+    "projectId": "mvp-stories",
+    "text": "UI web minimale per la conversazione",
+    "done": false,
+    "createdAt": "2026-07-08T13:57:11.991Z"
   }
 ]

@@ -283,9 +283,11 @@ app.get('/', async (req, res) => {
   const todayEntry = getEntry(log, today) || { projects: {}, habits: {} };
   const quote = await fetchRandomQuote();
 
-  const projectsStatus = config.projects
-    .slice()
-    .sort((a, b) => a.priority - b.priority)
+  // Un progetto resta visibile in Home finché non viene confermato come
+  // terminato (config.projects[].archived) — non sparisce solo perché ha
+  // già ricevuto uno step oggi o perché non è tra i primi per priorità.
+  const actionsToday = config.projects
+    .filter((p) => !p.archived)
     .map((p) => {
       const doneToday = stepsLoggedToday(todayEntry, p.id).length > 0;
       const last = lastDoneDate(log, p.id, today);
@@ -300,16 +302,11 @@ app.get('/', async (req, res) => {
         nextStepId: nextStep ? nextStep.id : null,
         nextStepText: nextStep ? nextStep.text : null,
       };
-    });
-
-  // 1-3 azioni per oggi: non ancora fatte, urgenti prima, poi per priorità.
-  const actionsToday = projectsStatus
-    .filter((p) => !p.doneToday)
+    })
     .sort((a, b) => {
       if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
       return a.priority - b.priority;
-    })
-    .slice(0, 3);
+    });
 
   const habitsStatus = config.habits.map((h) => ({
     ...h,
@@ -372,6 +369,28 @@ app.post('/home/complete-step', (req, res) => {
     nextStepId: nextStep ? nextStep.id : null,
     nextStepText: nextStep ? nextStep.text : null,
   });
+});
+
+// Conferma esplicita ("il progetto è terminato?") che rimuove un progetto
+// dalla Home: si arriva qui solo quando non ha più step aperti, e solo per
+// azione diretta dell'utente — mai in automatico.
+app.post('/home/finish-project', (req, res) => {
+  const { projectId } = req.body;
+  const config = readJSON(CONFIG_PATH);
+  const steps = readJSON(STEPS_PATH);
+
+  const project = config.projects.find((p) => p.id === projectId);
+  if (!project) {
+    return res.status(404).json({ ok: false, error: 'Progetto non trovato.' });
+  }
+  const hasOpenStep = steps.some((s) => s.projectId === projectId && !s.done);
+  if (hasOpenStep) {
+    return res.status(400).json({ ok: false, error: 'Il progetto ha ancora step aperti.' });
+  }
+
+  project.archived = true;
+  writeJSON(CONFIG_PATH, config);
+  res.json({ ok: true });
 });
 
 // Segna/de-segna una habit direttamente da home.

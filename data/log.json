@@ -25,7 +25,12 @@
     "date": "2026-07-08",
     "projects": {
       "mvp-stories": {
-        "steps": []
+        "steps": [
+          {
+            "stepId": "mr9gvkzhbe4y7",
+            "minutes": 0
+          }
+        ]
       },
       "studio-ai-agentica": {
         "steps": []
@@ -38,7 +43,7 @@
       }
     },
     "habits": {
-      "porta-avanti-progetti": false,
+      "porta-avanti-progetti": true,
       "allenamento": true,
       "meditazione": false
     }
