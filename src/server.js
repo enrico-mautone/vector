@@ -12,6 +12,7 @@ const STEPS_PATH = path.join(__dirname, '..', 'data', 'steps.json');
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 function readJSON(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
@@ -175,6 +176,60 @@ function stepsLoggedToday(todayEntry, projectId) {
   return (todayEntry.projects[projectId] && todayEntry.projects[projectId].steps) || [];
 }
 
+function buildLogProjects(config, steps, todayEntry) {
+  return config.projects.map((p) => {
+    const loggedToday = stepsLoggedToday(todayEntry, p.id);
+    const loggedById = new Map(loggedToday.map((s) => [s.stepId, s.minutes]));
+    const displaySteps = steps
+      .filter((s) => s.projectId === p.id && (!s.done || loggedById.has(s.id)))
+      .map((s) => ({
+        id: s.id,
+        text: s.text,
+        checkedToday: loggedById.has(s.id),
+        minutesToday: loggedById.has(s.id) ? loggedById.get(s.id) : '',
+      }));
+    return { ...p, displaySteps };
+  });
+}
+
+// Legge dal body del form POST /log gli step selezionati per ciascun
+// progetto, a prescindere da come poi verranno salvati (usata sia per il
+// salvataggio vero e proprio sia per ricostruire lo stato "come inviato"
+// quando il gate di priorità blocca il submit).
+function readLoggedStepsFromBody(config, steps, body) {
+  const loggedStepsByProject = {};
+  config.projects.forEach((p) => {
+    const projectSteps = steps.filter((s) => s.projectId === p.id);
+    const loggedSteps = [];
+    projectSteps.forEach((s) => {
+      if (body[`step_${s.id}_done`] === 'on') {
+        const minutes = parseInt(body[`step_${s.id}_minutes`], 10);
+        loggedSteps.push({ stepId: s.id, minutes: Number.isFinite(minutes) ? minutes : 0 });
+      }
+    });
+    loggedStepsByProject[p.id] = loggedSteps;
+  });
+  return loggedStepsByProject;
+}
+
+// Con "Lo devi fare!!!!" attivo: non si può registrare uno step su un
+// progetto se un progetto a priorità maggiore (numero più basso) non ha
+// ancora nessuno step registrato oggi. Ritorna il primo conflitto trovato
+// (progetto bloccante a priorità maggiore + progetto bloccato), o null.
+function checkPriorityGate(config, loggedStepsByProject) {
+  const sorted = config.projects.slice().sort((a, b) => a.priority - b.priority);
+  let blocker = null;
+  for (const p of sorted) {
+    const hasSteps = (loggedStepsByProject[p.id] || []).length > 0;
+    if (!hasSteps) {
+      if (!blocker) blocker = p;
+    } else if (blocker) {
+      return { blockedProject: p, blockingProject: blocker };
+    }
+  }
+  return null;
+}
+
 // Giorni trascorsi dall'ultima volta che almeno uno step di un progetto è
 // stato registrato nel log, scandendo a ritroso da `today` (esclusa).
 // null = mai registrato nessuno step.
@@ -208,11 +263,24 @@ function habitStreak(log, habitId, today) {
   return streak;
 }
 
-app.get('/', (req, res) => {
+async function fetchRandomQuote() {
+  try {
+    const response = await fetch('https://motivational-spark-api.vercel.app/api/quotes/random');
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (!data || !data.quote) return null;
+    return { text: data.quote, author: data.author || null };
+  } catch (err) {
+    return null;
+  }
+}
+
+app.get('/', async (req, res) => {
   const config = readJSON(CONFIG_PATH);
   const log = readJSON(LOG_PATH);
   const today = todayStr();
   const todayEntry = getEntry(log, today) || { projects: {}, habits: {} };
+  const quote = await fetchRandomQuote();
 
   const projectsStatus = config.projects
     .slice()
@@ -240,7 +308,7 @@ app.get('/', (req, res) => {
     streak: habitStreak(log, h.id, today),
   }));
 
-  res.render('home', { actionsToday, habitsStatus, today });
+  res.render('home', { actionsToday, habitsStatus, today, quote });
 });
 
 app.get('/log', (req, res) => {
@@ -250,21 +318,7 @@ app.get('/log', (req, res) => {
   const today = todayStr();
   const todayEntry = getEntry(log, today) || { projects: {}, habits: {} };
 
-  const projects = config.projects.map((p) => {
-    const loggedToday = stepsLoggedToday(todayEntry, p.id);
-    const loggedById = new Map(loggedToday.map((s) => [s.stepId, s.minutes]));
-    // Step selezionabili oggi: quelli ancora aperti, più quelli già
-    // registrati oggi (anche se nel frattempo segnati "fatti").
-    const displaySteps = steps
-      .filter((s) => s.projectId === p.id && (!s.done || loggedById.has(s.id)))
-      .map((s) => ({
-        id: s.id,
-        text: s.text,
-        checkedToday: loggedById.has(s.id),
-        minutesToday: loggedById.has(s.id) ? loggedById.get(s.id) : '',
-      }));
-    return { ...p, displaySteps };
-  });
+  const projects = buildLogProjects(config, steps, todayEntry);
 
   res.render('log', { projects, config, todayEntry, today });
 });
@@ -275,18 +329,28 @@ app.post('/log', (req, res) => {
   const steps = readJSON(STEPS_PATH);
   const today = todayStr();
 
-  const projects = {};
+  const loggedStepsByProject = readLoggedStepsFromBody(config, steps, req.body);
+
+  if (config.enforcePriorityOrder) {
+    const violation = checkPriorityGate(config, loggedStepsByProject);
+    if (violation) {
+      const submittedEntry = {
+        projects: Object.fromEntries(
+          Object.entries(loggedStepsByProject).map(([id, s]) => [id, { steps: s }])
+        ),
+        habits: {},
+      };
+      const error = `"Lo devi fare!!!!" è attivo: registra prima almeno uno step su "${violation.blockingProject.name}" (priorità più alta) prima di registrarne su "${violation.blockedProject.name}".`;
+      const projects = buildLogProjects(config, steps, submittedEntry);
+      return res.status(400).render('log', { projects, config, todayEntry: submittedEntry, today, error });
+    }
+  }
+
   config.projects.forEach((p) => {
-    const projectSteps = steps.filter((s) => s.projectId === p.id);
-    const loggedSteps = [];
-    projectSteps.forEach((s) => {
-      if (req.body[`step_${s.id}_done`] === 'on') {
-        const minutes = parseInt(req.body[`step_${s.id}_minutes`], 10);
-        loggedSteps.push({ stepId: s.id, minutes: Number.isFinite(minutes) ? minutes : 0 });
-        s.done = true;
-      }
+    loggedStepsByProject[p.id].forEach(({ stepId }) => {
+      const step = steps.find((s) => s.id === stepId);
+      if (step) step.done = true;
     });
-    projects[p.id] = { steps: loggedSteps };
   });
   writeJSON(STEPS_PATH, steps);
 
@@ -295,6 +359,9 @@ app.post('/log', (req, res) => {
     habits[h.id] = req.body[`habit_${h.id}`] === 'on';
   });
 
+  const projects = Object.fromEntries(
+    Object.entries(loggedStepsByProject).map(([id, s]) => [id, { steps: s }])
+  );
   const entry = { date: today, projects, habits };
   const existingIndex = log.findIndex((e) => e.date === today);
   if (existingIndex >= 0) {
@@ -340,6 +407,28 @@ app.post('/steps/bulk', (req, res) => {
     writeJSON(STEPS_PATH, steps);
   }
   res.redirect(`/steps?project=${encodeURIComponent(projectId)}`);
+});
+
+// Riordina gli step di un progetto secondo l'ordine (array di id) ricevuto
+// dal drag & drop lato client. Gli step degli altri progetti non sono
+// toccati; quelli del progetto vengono riscritti nel nuovo ordine.
+app.post('/steps/reorder', (req, res) => {
+  const { projectId, order } = req.body;
+  if (!projectId || !Array.isArray(order)) {
+    return res.status(400).json({ ok: false });
+  }
+  const steps = readJSON(STEPS_PATH);
+  const projectSteps = steps.filter((s) => s.projectId === projectId);
+  const byId = new Map(projectSteps.map((s) => [s.id, s]));
+  const reordered = order.map((id) => byId.get(id)).filter(Boolean);
+  // Eventuali step del progetto non presenti in `order` (dato incoerente)
+  // vengono comunque mantenuti, accodati.
+  projectSteps.forEach((s) => {
+    if (!order.includes(s.id)) reordered.push(s);
+  });
+  const otherSteps = steps.filter((s) => s.projectId !== projectId);
+  writeJSON(STEPS_PATH, otherSteps.concat(reordered));
+  res.json({ ok: true });
 });
 
 app.post('/steps/:id/toggle', (req, res) => {
@@ -405,6 +494,24 @@ app.get('/habits', (req, res) => {
   }
 
   res.render('habits', { view, ...extra });
+});
+
+app.get('/projects', (req, res) => {
+  const config = readJSON(CONFIG_PATH);
+  const projects = config.projects.slice().sort((a, b) => a.priority - b.priority);
+  res.render('projects', { projects });
+});
+
+app.get('/settings', (req, res) => {
+  const config = readJSON(CONFIG_PATH);
+  res.render('settings', { config });
+});
+
+app.post('/settings', (req, res) => {
+  const config = readJSON(CONFIG_PATH);
+  config.enforcePriorityOrder = req.body.enforcePriorityOrder === 'on';
+  writeJSON(CONFIG_PATH, config);
+  res.render('settings', { config, saved: true });
 });
 
 app.listen(PORT, () => {
