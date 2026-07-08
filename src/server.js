@@ -278,6 +278,7 @@ async function fetchRandomQuote() {
 app.get('/', async (req, res) => {
   const config = readJSON(CONFIG_PATH);
   const log = readJSON(LOG_PATH);
+  const steps = readJSON(STEPS_PATH);
   const today = todayStr();
   const todayEntry = getEntry(log, today) || { projects: {}, habits: {} };
   const quote = await fetchRandomQuote();
@@ -290,7 +291,15 @@ app.get('/', async (req, res) => {
       const last = lastDoneDate(log, p.id, today);
       const daysSince = last ? daysBetween(last, today) : null;
       const urgent = !doneToday && (daysSince === null || daysSince >= config.urgencyThresholdDays);
-      return { ...p, doneToday, daysSince, urgent };
+      const nextStep = steps.find((s) => s.projectId === p.id && !s.done);
+      return {
+        ...p,
+        doneToday,
+        daysSince,
+        urgent,
+        nextStepId: nextStep ? nextStep.id : null,
+        nextStepText: nextStep ? nextStep.text : null,
+      };
     });
 
   // 1-3 azioni per oggi: non ancora fatte, urgenti prima, poi per priorità.
@@ -308,7 +317,87 @@ app.get('/', async (req, res) => {
     streak: habitStreak(log, h.id, today),
   }));
 
-  res.render('home', { actionsToday, habitsStatus, today, quote });
+  res.render('home', { actionsToday, habitsStatus, today, quote, config });
+});
+
+// Segna eseguito, direttamente da home, il prossimo step aperto di un
+// progetto: stesso effetto di spuntarlo in /log (marca `done` in
+// steps.json + lo registra nel log di oggi), ma un solo step alla volta.
+// Rispetta il gate di priorità se "Lo devi fare!!!!" è attivo.
+app.post('/home/complete-step', (req, res) => {
+  const { projectId, stepId } = req.body;
+  const config = readJSON(CONFIG_PATH);
+  const log = readJSON(LOG_PATH);
+  const steps = readJSON(STEPS_PATH);
+  const today = todayStr();
+
+  const step = steps.find((s) => s.id === stepId && s.projectId === projectId && !s.done);
+  if (!step) {
+    return res.status(404).json({ ok: false, error: 'Step non trovato o già completato.' });
+  }
+
+  const todayEntry = getEntry(log, today) || { projects: {}, habits: {} };
+  const loggedStepsByProject = {};
+  config.projects.forEach((p) => {
+    loggedStepsByProject[p.id] = stepsLoggedToday(todayEntry, p.id).map((s) => ({ stepId: s.stepId }));
+  });
+  loggedStepsByProject[projectId] = loggedStepsByProject[projectId].concat([{ stepId }]);
+
+  if (config.enforcePriorityOrder) {
+    const violation = checkPriorityGate(config, loggedStepsByProject);
+    if (violation) {
+      const error = `"Lo devi fare!!!!" è attivo: registra prima almeno uno step su "${violation.blockingProject.name}" (priorità più alta) prima di registrarne su "${violation.blockedProject.name}".`;
+      return res.status(400).json({ ok: false, error });
+    }
+  }
+
+  step.done = true;
+  writeJSON(STEPS_PATH, steps);
+
+  const projectEntry = todayEntry.projects[projectId] || { steps: [] };
+  projectEntry.steps = projectEntry.steps.concat([{ stepId, minutes: 0 }]);
+  todayEntry.projects[projectId] = projectEntry;
+  todayEntry.date = today;
+  const existingIndex = log.findIndex((e) => e.date === today);
+  if (existingIndex >= 0) {
+    log[existingIndex] = todayEntry;
+  } else {
+    log.push(todayEntry);
+  }
+  writeJSON(LOG_PATH, log);
+
+  const nextStep = steps.find((s) => s.projectId === projectId && !s.done);
+  res.json({
+    ok: true,
+    nextStepId: nextStep ? nextStep.id : null,
+    nextStepText: nextStep ? nextStep.text : null,
+  });
+});
+
+// Segna/de-segna una habit direttamente da home.
+app.post('/home/toggle-habit', (req, res) => {
+  const { habitId } = req.body;
+  const config = readJSON(CONFIG_PATH);
+  const log = readJSON(LOG_PATH);
+  const today = todayStr();
+
+  if (!config.habits.some((h) => h.id === habitId)) {
+    return res.status(404).json({ ok: false, error: 'Habit non trovata.' });
+  }
+
+  const todayEntry = getEntry(log, today) || { date: today, projects: {}, habits: {} };
+  const done = !(todayEntry.habits && todayEntry.habits[habitId]);
+  todayEntry.habits = { ...todayEntry.habits, [habitId]: done };
+  todayEntry.date = today;
+  const existingIndex = log.findIndex((e) => e.date === today);
+  if (existingIndex >= 0) {
+    log[existingIndex] = todayEntry;
+  } else {
+    log.push(todayEntry);
+  }
+  writeJSON(LOG_PATH, log);
+
+  res.json({ ok: true, done, streak: habitStreak(log, habitId, today) });
 });
 
 app.get('/log', (req, res) => {
