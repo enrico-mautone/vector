@@ -1,149 +1,23 @@
 [
   {
-    "id": "mr9ge9657g7n5",
-    "projectId": "personal-branding",
-    "text": "Definisci in una frase cosa deve pensare chi visita il sito su di te (obiettivo pagina) (10 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge9653vfqq",
-    "projectId": "personal-branding",
-    "text": "Raccogli 3-5 siti personali che ti piacciono come riferimento di stile (15 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965t0f8u",
-    "projectId": "personal-branding",
-    "text": "Scrivi il prompt di scaffold per Claude Code: sito personale in Node.js con sezioni Chi sono, Contatto, Newsletter (15 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965kgmy7",
-    "projectId": "personal-branding",
-    "text": "Fai fare a Claude Code lo scaffold iniziale del progetto Node.js (15 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965x6j88",
-    "projectId": "personal-branding",
-    "text": "Interview con Claude Code per definire copy e struttura della sezione Chi sono (15 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965swzre",
-    "projectId": "personal-branding",
-    "text": "Costruisci la sezione Chi sono con bio e percorso Service Manager -> CTO (20 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965rid7f",
-    "projectId": "personal-branding",
-    "text": "Costruisci la sezione Contatto (email/link social) (15 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965mnzca",
-    "projectId": "personal-branding",
-    "text": "Costruisci la form di iscrizione newsletter (frontend) (20 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965g4z5n",
-    "projectId": "personal-branding",
-    "text": "Collega la form newsletter a un servizio/storage per salvare gli iscritti (20 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965tb7wu",
-    "projectId": "personal-branding",
-    "text": "Testa nel browser l'iscrizione newsletter end-to-end (10 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965z4jko",
-    "projectId": "personal-branding",
-    "text": "Genera con Claude Code il testo \"About Me\" denso e factual, ottimizzato per essere letto da un'AI (20 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965zbcjb",
-    "projectId": "personal-branding",
-    "text": "Scrivi il preloaded prompt da usare nel blocco ask-AI-about-me (chi sei, cosa fai, contesto) (15 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965kqfhl",
-    "projectId": "personal-branding",
-    "text": "Fai costruire a Claude Code il blocco footer \"Chiedi all'AI chi sono\" con link precompilati a ChatGPT/Claude/Gemini (20 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965mq3wl",
-    "projectId": "personal-branding",
-    "text": "Testa nel browser ogni link del blocco ask-AI-about-me (click, verifica che il prompt si carichi) (10 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge96550dho",
-    "projectId": "personal-branding",
-    "text": "Scegli provider di hosting/dominio e ottieni la API key (15 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965y5fwz",
-    "projectId": "personal-branding",
-    "text": "Configura il connettore MCP dell'hosting in Claude Code (15 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge965lcbl4",
-    "projectId": "personal-branding",
-    "text": "Fai fare a Claude Code il deploy del sito (15 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
-    "id": "mr9ge9659fmwa",
-    "projectId": "personal-branding",
-    "text": "Verifica il sito online sul dominio reale: Chi sono, Contatto, Newsletter, ask-AI-about-me (15 min)",
-    "done": false,
-    "createdAt": "2026-07-06T16:47:47.693Z"
-  },
-  {
     "id": "mr9gwn6py85iz",
     "projectId": "studio-ai-agentica",
     "text": "Definire primo progetto agentico (10min)",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-06T17:02:05.665Z"
   },
   {
     "id": "mr9gwrqdlkj2j",
     "projectId": "studio-ai-agentica",
     "text": "Pianificare gli step (10min)",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-06T17:02:11.557Z"
   },
   {
     "id": "mr9gvkzhbe4y7",
     "projectId": "mvp-stories",
     "text": "Creare specifica MVP (20min)",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-06T17:01:16.157Z"
   },
   {
@@ -187,5 +61,61 @@
     "text": "UI web minimale per la conversazione",
     "done": false,
     "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mr9ge965x6j88",
+    "projectId": "personal-branding",
+    "text": "Interview con Claude Code per definire copy e struttura della sezione Chi sono (15 min)",
+    "done": true,
+    "createdAt": "2026-07-06T16:47:47.693Z"
+  },
+  {
+    "id": "mr9ge965swzre",
+    "projectId": "personal-branding",
+    "text": "Costruisci la sezione Chi sono con bio e percorso Service Manager -> CTO (20 min)",
+    "done": true,
+    "createdAt": "2026-07-06T16:47:47.693Z"
+  },
+  {
+    "id": "mr9ge965z4jko",
+    "projectId": "personal-branding",
+    "text": "Genera con Claude Code il testo \"About Me\" denso e factual, ottimizzato per essere letto da un'AI (20 min)",
+    "done": false,
+    "createdAt": "2026-07-06T16:47:47.693Z"
+  },
+  {
+    "id": "mr9ge965zbcjb",
+    "projectId": "personal-branding",
+    "text": "Scrivi il preloaded prompt da usare nel blocco ask-AI-about-me (chi sei, cosa fai, contesto) (15 min)",
+    "done": false,
+    "createdAt": "2026-07-06T16:47:47.693Z"
+  },
+  {
+    "id": "mr9ge965kqfhl",
+    "projectId": "personal-branding",
+    "text": "Fai costruire a Claude Code il blocco footer \"Chiedi all'AI chi sono\" con link precompilati a ChatGPT/Claude/Gemini (20 min)",
+    "done": false,
+    "createdAt": "2026-07-06T16:47:47.693Z"
+  },
+  {
+    "id": "mr9ge965tb7wu",
+    "projectId": "personal-branding",
+    "text": "Testa nel browser l'iscrizione newsletter end-to-end (10 min)",
+    "done": false,
+    "createdAt": "2026-07-06T16:47:47.693Z"
+  },
+  {
+    "id": "mr9ge965mq3wl",
+    "projectId": "personal-branding",
+    "text": "Testa nel browser ogni link del blocco ask-AI-about-me (click, verifica che il prompt si carichi) (10 min)",
+    "done": false,
+    "createdAt": "2026-07-06T16:47:47.693Z"
+  },
+  {
+    "id": "mr9ge9659fmwa",
+    "projectId": "personal-branding",
+    "text": "Verifica il sito online sul dominio reale: Chi sono, Contatto, Newsletter, ask-AI-about-me (15 min)",
+    "done": false,
+    "createdAt": "2026-07-06T16:47:47.693Z"
   }
 ]

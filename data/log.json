@@ -29,14 +29,40 @@
           {
             "stepId": "mr9gvkzhbe4y7",
             "minutes": 0
+          },
+          {
+            "stepId": "mr9gvkzhbe4y7",
+            "minutes": 0
           }
         ]
       },
       "studio-ai-agentica": {
-        "steps": []
+        "steps": [
+          {
+            "stepId": "mr9gwn6py85iz",
+            "minutes": 0
+          },
+          {
+            "stepId": "mr9gwrqdlkj2j",
+            "minutes": 0
+          }
+        ]
       },
       "personal-branding": {
-        "steps": []
+        "steps": [
+          {
+            "stepId": "mr9ge965x6j88",
+            "minutes": 0
+          },
+          {
+            "stepId": "mr9ge965swzre",
+            "minutes": 0
+          },
+          {
+            "stepId": "mr9ge965z4jko",
+            "minutes": 0
+          }
+        ]
       },
       "shoebox": {
         "steps": []

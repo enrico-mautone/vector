@@ -15,7 +15,10 @@
   .action { flex:1; padding:12px 16px; border-radius:8px; background:#1b1b1f; }
   .action.urgent { border-left:4px solid #e5484d; }
   .action.normal { border-left:4px solid #3b82f6; }
+  .action.blocked { border-left:4px solid #333; opacity:0.5; }
   .action-priority { width:56px; min-height:100%; background:#1b1b1f; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:800; color:#3b82f6; line-height:1; }
+  .action-row.blocked .action-priority { color:#555; }
+  .blocked-hint { color:#666; font-style:italic; }
   .habit { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #222; }
   .habit label { display:flex; align-items:center; gap:8px; cursor:pointer; }
   .streak { color:#f5a623; }
@@ -56,24 +59,28 @@
     <p class="empty">Tutto fatto per oggi.</p>
   <% } else { %>
     <% actionsToday.forEach(function(p) { %>
-      <div class="action-row" data-project-row="<%= p.id %>">
+      <div class="action-row <%= p.workable ? '' : 'blocked' %>" data-project-row="<%= p.id %>">
         <div class="action-priority"><%= p.priority %></div>
-        <div class="action <%= p.urgent ? 'urgent' : 'normal' %>">
+        <div class="action <%= !p.workable ? 'blocked' : (p.urgent ? 'urgent' : 'normal') %>">
           <strong><%= p.name %></strong><br>
-          <span class="step-slot" data-project="<%= p.id %>">
-            <% if (p.nextStepText) { %>
-              <label class="next-step">
-                <input type="checkbox" class="step-checkbox" data-project="<%= p.id %>" data-step="<%= p.nextStepId %>">
-                <span><span class="label">Prossimo:</span> <span class="step-text"><%= p.nextStepText %></span></span>
-              </label>
-            <% } else { %>
-              <label class="next-step finish-project">
-                <input type="checkbox" class="finish-checkbox" data-project="<%= p.id %>">
-                <span class="no-step">Non ci sono più task, il progetto è terminato?</span>
-              </label>
-            <% } %>
-          </span>
-          <% if (p.urgent) { %> — <strong>urgente</strong><% } %>
+          <% if (p.workable) { %>
+            <span class="step-slot" data-project="<%= p.id %>">
+              <% if (p.nextStepText) { %>
+                <label class="next-step">
+                  <input type="checkbox" class="step-checkbox" data-project="<%= p.id %>" data-step="<%= p.nextStepId %>">
+                  <span><span class="label">Prossimo:</span> <span class="step-text"><%= p.nextStepText %></span></span>
+                </label>
+              <% } else { %>
+                <label class="next-step finish-project">
+                  <input type="checkbox" class="finish-checkbox" data-project="<%= p.id %>">
+                  <span class="no-step">Non ci sono più task, il progetto è terminato?</span>
+                </label>
+              <% } %>
+            </span>
+            <% if (p.urgent) { %> — <strong>urgente</strong><% } %>
+          <% } else { %>
+            <span class="blocked-hint">Completa prima i progetti a priorità più alta.</span>
+          <% } %>
         </div>
       </div>
     <% }); %>

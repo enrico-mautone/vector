@@ -286,26 +286,31 @@ app.get('/', async (req, res) => {
   // Un progetto resta visibile in Home finché non viene confermato come
   // terminato (config.projects[].archived) — non sparisce solo perché ha
   // già ricevuto uno step oggi o perché non è tra i primi per priorità.
+  // L'ordine è fisso per priorità (mai per stato del giorno), così spuntare
+  // un'attività non fa "saltare" i progetti in lista.
+  let priorAllDone = true; // tutti i progetti a priorità più alta hanno già uno step oggi
   const actionsToday = config.projects
     .filter((p) => !p.archived)
+    .sort((a, b) => a.priority - b.priority)
     .map((p) => {
       const doneToday = stepsLoggedToday(todayEntry, p.id).length > 0;
       const last = lastDoneDate(log, p.id, today);
       const daysSince = last ? daysBetween(last, today) : null;
       const urgent = !doneToday && (daysSince === null || daysSince >= config.urgencyThresholdDays);
       const nextStep = steps.find((s) => s.projectId === p.id && !s.done);
+      // Lavorabile oggi: tutti i progetti a priorità maggiore hanno già
+      // ricevuto uno step oggi (progetto 1 sempre lavorabile).
+      const workable = priorAllDone;
+      priorAllDone = priorAllDone && doneToday;
       return {
         ...p,
         doneToday,
         daysSince,
         urgent,
+        workable,
         nextStepId: nextStep ? nextStep.id : null,
         nextStepText: nextStep ? nextStep.text : null,
       };
-    })
-    .sort((a, b) => {
-      if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
-      return a.priority - b.priority;
     });
 
   const habitsStatus = config.habits.map((h) => ({
