@@ -25,7 +25,6 @@
   <nav>
     <a href="/">Home</a>
     <a href="/log">Log</a>
-    <a href="/steps">Step successivi</a>
     <a href="/habits">Habit calendario</a>
     <a href="/projects">Progetti</a>
     <a href="/settings">Impostazioni</a>
@@ -42,7 +41,7 @@
         <div class="project-block">
           <h3><%= p.name %></h3>
           <% if (p.displaySteps.length === 0) { %>
-            <p class="no-steps">Nessuno step aperto. <a href="/steps?project=<%= p.id %>">Aggiungine uno</a>.</p>
+            <p class="no-steps">Nessuno step aperto. <a href="/projects?open=<%= p.id %>">Aggiungine uno</a>.</p>
           <% } else { %>
             <% p.displaySteps.forEach(function(s) { %>
               <div class="step-row">

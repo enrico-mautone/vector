@@ -462,18 +462,6 @@ app.post('/log', (req, res) => {
   res.redirect('/');
 });
 
-app.get('/steps', (req, res) => {
-  const config = readJSON(CONFIG_PATH);
-  const steps = readJSON(STEPS_PATH);
-  const sortedProjects = config.projects.slice().sort((a, b) => a.priority - b.priority);
-  const selectedProjectId = req.query.project || sortedProjects[0].id;
-  const projectSteps = steps
-    .filter((s) => s.projectId === selectedProjectId)
-    .sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
-
-  res.render('steps', { projects: sortedProjects, selectedProjectId, projectSteps });
-});
-
 app.post('/steps/add', (req, res) => {
   const { projectId, text } = req.body;
   if (text && text.trim()) {
@@ -481,7 +469,7 @@ app.post('/steps/add', (req, res) => {
     steps.push({ id: generateId(), projectId, text: text.trim(), done: false, createdAt: new Date().toISOString() });
     writeJSON(STEPS_PATH, steps);
   }
-  res.redirect(`/steps?project=${encodeURIComponent(projectId)}`);
+  res.redirect(`/projects?open=${encodeURIComponent(projectId)}`);
 });
 
 app.post('/steps/bulk', (req, res) => {
@@ -495,7 +483,7 @@ app.post('/steps/bulk', (req, res) => {
     });
     writeJSON(STEPS_PATH, steps);
   }
-  res.redirect(`/steps?project=${encodeURIComponent(projectId)}`);
+  res.redirect(`/projects?open=${encodeURIComponent(projectId)}`);
 });
 
 // Riordina gli step di un progetto secondo l'ordine (array di id) ricevuto
@@ -528,7 +516,7 @@ app.post('/steps/:id/toggle', (req, res) => {
     step.done = !step.done;
     writeJSON(STEPS_PATH, steps);
   }
-  res.redirect(`/steps?project=${encodeURIComponent(projectId)}`);
+  res.redirect(`/projects?open=${encodeURIComponent(projectId)}`);
 });
 
 app.post('/steps/:id/delete', (req, res) => {
@@ -537,7 +525,7 @@ app.post('/steps/:id/delete', (req, res) => {
   const projectId = step ? step.projectId : req.body.projectId;
   const remaining = steps.filter((s) => s.id !== req.params.id);
   writeJSON(STEPS_PATH, remaining);
-  res.redirect(`/steps?project=${encodeURIComponent(projectId)}`);
+  res.redirect(`/projects?open=${encodeURIComponent(projectId)}`);
 });
 
 app.get('/habits', (req, res) => {
@@ -587,8 +575,18 @@ app.get('/habits', (req, res) => {
 
 app.get('/projects', (req, res) => {
   const config = readJSON(CONFIG_PATH);
-  const projects = config.projects.slice().sort((a, b) => a.priority - b.priority);
-  res.render('projects', { projects });
+  const steps = readJSON(STEPS_PATH);
+  const projects = config.projects
+    .slice()
+    .sort((a, b) => a.priority - b.priority)
+    .map((p) => {
+      const projectSteps = steps
+        .filter((s) => s.projectId === p.id)
+        .sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
+      return { ...p, projectSteps };
+    });
+  const openProject = req.query.open || null;
+  res.render('projects', { projects, openProject });
 });
 
 app.get('/settings', (req, res) => {
