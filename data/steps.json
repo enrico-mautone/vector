@@ -140,17 +140,17 @@
     "createdAt": "2026-07-06T17:02:11.557Z"
   },
   {
-    "id": "mr9gw0fh86d3p",
-    "projectId": "mvp-stories",
-    "text": "Pianificare gli step (10min)",
-    "done": true,
-    "createdAt": "2026-07-06T17:01:36.173Z"
-  },
-  {
     "id": "mr9gvkzhbe4y7",
     "projectId": "mvp-stories",
     "text": "Creare specifica MVP (20min)",
     "done": false,
     "createdAt": "2026-07-06T17:01:16.157Z"
+  },
+  {
+    "id": "mr9gw0fh86d3p",
+    "projectId": "mvp-stories",
+    "text": "Pianificare gli step (10min)",
+    "done": false,
+    "createdAt": "2026-07-06T17:01:36.173Z"
   }
 ]
