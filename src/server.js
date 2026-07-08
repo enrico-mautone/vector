@@ -302,9 +302,11 @@ app.get('/', async (req, res) => {
       const hasBacklog = steps.some((s) => s.projectId === p.id);
       const nextStep = steps.find((s) => s.projectId === p.id && !s.done);
       // Lavorabile oggi: tutti i progetti a priorità maggiore hanno già
-      // ricevuto uno step oggi (progetto 1 sempre lavorabile).
+      // ricevuto uno step oggi (progetto 1 sempre lavorabile). Un progetto
+      // a backlog vuoto non può mai ricevere uno step, quindi non blocca la
+      // catena per chi viene dopo di lui in priorità.
       const workable = priorAllDone;
-      priorAllDone = priorAllDone && doneToday;
+      priorAllDone = priorAllDone && (doneToday || !hasBacklog);
       return {
         ...p,
         doneToday,
