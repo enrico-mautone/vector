@@ -83,6 +83,7 @@ function ActionCard({
     setPending(true)
     try {
       await api.completeStep(project.id, project.nextStepId)
+      toast.success('Ben fatto continua così!! +10pt')
       onChange()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Errore nel salvataggio.')
@@ -169,7 +170,8 @@ function ActionCard({
 function HabitsPanel({ data, onChange }: { data: HomeData; onChange: () => void }) {
   async function handleToggle(habitId: string) {
     try {
-      await api.toggleHabit(habitId)
+      const result = await api.toggleHabit(habitId)
+      if (result.done) toast.success('Ben fatto continua così!! +10pt')
       onChange()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Errore nel salvataggio.')
