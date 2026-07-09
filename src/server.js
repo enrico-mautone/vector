@@ -209,8 +209,10 @@ function groupLoggedStepsByProject(config, steps, loggedSteps) {
 // progetto se un progetto a priorità maggiore (numero più basso) non ha
 // ancora nessuno step registrato oggi. Ritorna il primo conflitto trovato
 // (progetto bloccante a priorità maggiore + progetto bloccato), o null.
-function checkPriorityGate(config, loggedStepsByProject) {
-  const sorted = config.projects.slice().sort((a, b) => a.priority - b.priority);
+function checkPriorityGate(config, loggedStepsByProject, steps) {
+  const sorted = config.projects
+    .filter((p) => !p.archived && steps.some((s) => s.projectId === p.id))
+    .sort((a, b) => a.priority - b.priority);
   let blocker = null;
   for (const p of sorted) {
     const hasSteps = (loggedStepsByProject[p.id] || []).length > 0;
@@ -278,13 +280,14 @@ function buildHomeData(quote) {
   // Un progetto resta visibile in Home finché non viene confermato come
   // terminato (config.projects[].archived) — non sparisce solo perché ha
   // già ricevuto uno step oggi o perché non è tra i primi per priorità.
-  // L'ordine è fisso per priorità (mai per stato del giorno), così spuntare
-  // un'attività non fa "saltare" i progetti in lista. Il calcolo di
-  // "workable" segue sempre l'ordine di priorità puro; solo la posizione in
-  // lista viene poi rivista per mandare in fondo i progetti a backlog vuoto.
+  // I progetti senza nessuno step (mai avuto un backlog) sono invece esclusi
+  // del tutto: non hanno nulla da fare, quindi non contano né per l'elenco
+  // né per il gate "Lo devi fare!!!!". L'ordine è fisso per priorità (mai
+  // per stato del giorno), così spuntare un'attività non fa "saltare" i
+  // progetti in lista.
   let priorAllDone = true;
   const actionsToday = config.projects
-    .filter((p) => !p.archived)
+    .filter((p) => !p.archived && steps.some((s) => s.projectId === p.id))
     .sort((a, b) => a.priority - b.priority)
     .map((p) => {
       const doneToday = stepsLoggedToday(todayEntry, p.id).length > 0;
@@ -349,7 +352,7 @@ app.post('/api/home/complete-step', (req, res) => {
   loggedStepsByProject[projectId] = loggedStepsByProject[projectId].concat([{ stepId }]);
 
   if (config.enforcePriorityOrder) {
-    const violation = checkPriorityGate(config, loggedStepsByProject);
+    const violation = checkPriorityGate(config, loggedStepsByProject, steps);
     if (violation) {
       const error = `"Lo devi fare!!!!" è attivo: registra prima almeno uno step su "${violation.blockingProject.name}" (priorità più alta) prima di registrarne su "${violation.blockedProject.name}".`;
       return res.status(400).json({ ok: false, error });
@@ -449,7 +452,7 @@ app.post('/api/log', (req, res) => {
   const loggedStepsByProject = groupLoggedStepsByProject(config, steps, req.body.steps);
 
   if (config.enforcePriorityOrder) {
-    const violation = checkPriorityGate(config, loggedStepsByProject);
+    const violation = checkPriorityGate(config, loggedStepsByProject, steps);
     if (violation) {
       const error = `"Lo devi fare!!!!" è attivo: registra prima almeno uno step su "${violation.blockingProject.name}" (priorità più alta) prima di registrarne su "${violation.blockedProject.name}".`;
       return res.status(400).json({ ok: false, error });

@@ -106,6 +106,14 @@
           {
             "stepId": "mrc56kl3j7bry",
             "minutes": 0
+          },
+          {
+            "stepId": "mrc56kl3z8ngz",
+            "minutes": 0
+          },
+          {
+            "stepId": "mrc56kl3alt2q",
+            "minutes": 0
           }
         ]
       },
@@ -132,10 +140,19 @@
             "minutes": 0
           }
         ]
+      },
+      "vector": {
+        "steps": [
+          {
+            "stepId": "mrc8x58ibw9i8",
+            "minutes": 0
+          }
+        ]
       }
     },
     "habits": {
-      "porta-avanti-progetti": true
+      "porta-avanti-progetti": true,
+      "allenamento": true
     }
   }
 ]
