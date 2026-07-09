@@ -63,22 +63,21 @@
         <div class="action-priority"><%= p.priority %></div>
         <div class="action <%= !p.workable ? 'blocked' : (p.urgent ? 'urgent' : 'normal') %>">
           <strong><%= p.name %></strong><br>
-          <% if (p.workable) { %>
-            <span class="step-slot" data-project="<%= p.id %>">
-              <% if (p.nextStepText) { %>
-                <label class="next-step">
-                  <input type="checkbox" class="step-checkbox" data-project="<%= p.id %>" data-step="<%= p.nextStepId %>">
-                  <span><span class="label">Prossimo:</span> <span class="step-text"><%= p.nextStepText %></span></span>
-                </label>
-              <% } else { %>
-                <label class="next-step finish-project">
-                  <input type="checkbox" class="finish-checkbox" data-project="<%= p.id %>">
-                  <span class="no-step">Non ci sono più task, il progetto è terminato?</span>
-                </label>
-              <% } %>
-            </span>
-            <% if (p.urgent) { %> — <strong>urgente</strong><% } %>
-          <% } else { %>
+          <span class="step-slot" data-project="<%= p.id %>">
+            <% if (p.nextStepText) { %>
+              <label class="next-step">
+                <input type="checkbox" class="step-checkbox" data-project="<%= p.id %>" data-step="<%= p.nextStepId %>">
+                <span><span class="label">Prossimo:</span> <span class="step-text"><%= p.nextStepText %></span></span>
+              </label>
+            <% } else { %>
+              <label class="next-step finish-project">
+                <input type="checkbox" class="finish-checkbox" data-project="<%= p.id %>">
+                <span class="no-step">Non ci sono più task, il progetto è terminato?</span>
+              </label>
+            <% } %>
+          </span>
+          <% if (p.workable && p.urgent) { %> — <strong>urgente</strong><% } %>
+          <% if (!p.workable) { %>
             <span class="blocked-hint">Completa prima i progetti a priorità più alta.</span>
           <% } %>
         </div>
