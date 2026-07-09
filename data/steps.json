@@ -24,7 +24,7 @@
     "id": "mrc56kl3j7bry",
     "projectId": "mvp-stories",
     "text": "Fork & setup Hermes Agent",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-08T13:57:11.991Z"
   },
   {
@@ -80,43 +80,316 @@
     "id": "mr9ge965z4jko",
     "projectId": "personal-branding",
     "text": "Genera con Claude Code il testo \"About Me\" denso e factual, ottimizzato per essere letto da un'AI (20 min)",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-06T16:47:47.693Z"
   },
   {
     "id": "mr9ge965zbcjb",
     "projectId": "personal-branding",
     "text": "Scrivi il preloaded prompt da usare nel blocco ask-AI-about-me (chi sei, cosa fai, contesto) (15 min)",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-06T16:47:47.693Z"
   },
   {
     "id": "mr9ge965kqfhl",
     "projectId": "personal-branding",
     "text": "Fai costruire a Claude Code il blocco footer \"Chiedi all'AI chi sono\" con link precompilati a ChatGPT/Claude/Gemini (20 min)",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-06T16:47:47.693Z"
   },
   {
     "id": "mr9ge965tb7wu",
     "projectId": "personal-branding",
     "text": "Testa nel browser l'iscrizione newsletter end-to-end (10 min)",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-06T16:47:47.693Z"
   },
   {
     "id": "mr9ge965mq3wl",
     "projectId": "personal-branding",
     "text": "Testa nel browser ogni link del blocco ask-AI-about-me (click, verifica che il prompt si carichi) (10 min)",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-06T16:47:47.693Z"
   },
   {
     "id": "mr9ge9659fmwa",
     "projectId": "personal-branding",
     "text": "Verifica il sito online sul dominio reale: Chi sono, Contatto, Newsletter, ask-AI-about-me (15 min)",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-06T16:47:47.693Z"
+  },
+  {
+    "id": "mrcafpnwf9699",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 09/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwt0mc0",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 10/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwjhj9o",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 13/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwtasmc",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 14/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwk6flt",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 15/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwvcdrh",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 16/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw9nncs",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 17/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwsxcet",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 20/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwbv4c3",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 21/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwet0gw",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 22/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw9a9up",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 23/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw6u7xq",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 24/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwn03nt",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 27/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwpvutr",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 28/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw4kbx9",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 29/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwxznrj",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 30/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwfv485",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 31/07/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwd0pzb",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 03/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwgdnq6",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 04/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwwigfu",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 05/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwg4xuy",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 06/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw4wlov",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 07/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwgjld0",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 10/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwgw9py",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 11/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw8286o",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 12/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw8o1lt",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 13/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwjrn8j",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 14/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw7240j",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 17/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwk3w3r",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 18/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwycavl",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 19/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwal1ef",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 20/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw870m0",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 21/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwqu4ze",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 24/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw3587t",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 25/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw6m9ls",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 26/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwl2loe",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 27/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnwhm796",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 28/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw378wg",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 31/08/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
+  },
+  {
+    "id": "mrcafpnw4rzqv",
+    "projectId": "personal-branding",
+    "text": "Articolo blog - 01/09/2026",
+    "done": false,
+    "createdAt": "2026-07-08T16:24:16.556Z"
   },
   {
     "id": "mrc8x58ibw9i8",
@@ -124,5 +397,82 @@
     "text": "Refactoring interfaccia",
     "done": false,
     "createdAt": "2026-07-08T15:41:50.658Z"
+  },
+  {
+    "id": "mrc90qmk94u26",
+    "projectId": "vector",
+    "text": "Logica gamification e activity points",
+    "done": false,
+    "createdAt": "2026-07-08T15:44:38.348Z"
+  },
+  {
+    "id": "mrc90ead8lrmn",
+    "projectId": "vector",
+    "text": "Aggiunta grafico lineare per tracciae Activity points",
+    "done": false,
+    "createdAt": "2026-07-08T15:44:22.357Z"
+  },
+  {
+    "id": "mrcaiezjv9cds",
+    "projectId": "vector",
+    "text": "Cosa abbiamo imparato oggi",
+    "done": false,
+    "createdAt": "2026-07-08T16:26:22.687Z"
+  },
+  {
+    "id": "mr7ct9068aw5",
+    "projectId": "studio-ai-agentica",
+    "text": "1a. (5 min) Apri un file/notebook Python o la chat web di un LLM — decidi dove farai il test.",
+    "done": true,
+    "createdAt": "2026-07-09T08:36:55.278Z"
+  },
+  {
+    "id": "mryc5oge6ksl",
+    "projectId": "studio-ai-agentica",
+    "text": "1b. (5 min) Chiedi al modello \"quanto fa 4.1 moltiplicato per 7.9?\", scrivi la sua risposta e confrontala col risultato vero (32.39).",
+    "done": true,
+    "createdAt": "2026-07-09T08:36:55.278Z"
+  },
+  {
+    "id": "mry5tcw8vyp1",
+    "projectId": "studio-ai-agentica",
+    "text": "1c. (5 min) Chiedi al modello qualcosa su un evento/prodotto uscito dopo il suo training cutoff, osserva se inventa una risposta plausibile ma falsa.",
+    "done": true,
+    "createdAt": "2026-07-09T08:36:55.278Z"
+  },
+  {
+    "id": "mraotfr9kr87",
+    "projectId": "studio-ai-agentica",
+    "text": "1d. (5 min) Annota cosa hai osservato: come ha sbagliato, con quanta sicurezza, e perché questo giustifica servire agenti/RAG.",
+    "done": false,
+    "createdAt": "2026-07-09T08:36:55.278Z"
+  },
+  {
+    "id": "mrd75h4hz5i4z",
+    "projectId": "studio-ai-agentica",
+    "text": "2. (20 min) Scrivi un singolo tool con @tool. Prendi una funzione Python qualsiasi (una calcolatrice, una funzione meteo finta) e trasformala in un tool con @tool. Concentrati solo su tre cose: docstring chiara in linguaggio naturale, nomi di parametri autoesplicativi, type annotation. Questo schema è letteralmente ciò che il modello \"vede\" — è la base di tutto il resto.",
+    "done": false,
+    "createdAt": "2026-07-09T07:40:06.257Z"
+  },
+  {
+    "id": "mrd75h4hqc1rs",
+    "projectId": "studio-ai-agentica",
+    "text": "3. (20 min) Fai una singola chiamata \"tool calling\" senza agent executor. Passa il tool sopra a un modello con tool-calling nativo (OpenAI/Anthropic) e guarda l'output grezzo: il modello decide quale tool chiamare e con che argomenti, ma non lo esegue lui. Eseguilo tu a mano, una volta, manualmente. Questo ti fa capire la distinzione fondamentale tra \"agent\" (il ragionamento) e \"agent executor\" (il loop che esegue).",
+    "done": false,
+    "createdAt": "2026-07-09T07:40:06.257Z"
+  },
+  {
+    "id": "mrd75h4hz9hiz",
+    "projectId": "studio-ai-agentica",
+    "text": "4. (15 min) Leggi (non implementare ancora) il ciclo ReAct. Prendi 15 minuti per capire il pattern Thought → Action → Action Input → Observation, ripetuto. Non serve costruirlo — basta che tu lo riconosca quando lo vedi in LangChain/LangGraph dopo.",
+    "done": false,
+    "createdAt": "2026-07-09T07:40:06.257Z"
+  },
+  {
+    "id": "mrd75h4h9ftwc",
+    "projectId": "studio-ai-agentica",
+    "text": "5. (20 min) Prova create_tool_calling_agent di LangChain (o l'equivalente astratto). Solo per vedere il loop completo funzionare \"a scatola chiusa\" con il tool che hai scritto al punto 2. Non capire l'interno ancora — l'obiettivo è \"vedere qualcosa che funziona\" prima di smontarlo.",
+    "done": false,
+    "createdAt": "2026-07-09T07:40:06.257Z"
   }
 ]

@@ -61,6 +61,30 @@
           {
             "stepId": "mr9ge965z4jko",
             "minutes": 0
+          },
+          {
+            "stepId": "mr9ge965z4jko",
+            "minutes": 0
+          },
+          {
+            "stepId": "mr9ge965zbcjb",
+            "minutes": 0
+          },
+          {
+            "stepId": "mr9ge965kqfhl",
+            "minutes": 0
+          },
+          {
+            "stepId": "mr9ge965tb7wu",
+            "minutes": 0
+          },
+          {
+            "stepId": "mr9ge965mq3wl",
+            "minutes": 0
+          },
+          {
+            "stepId": "mr9ge9659fmwa",
+            "minutes": 0
           }
         ]
       },
@@ -72,6 +96,46 @@
       "porta-avanti-progetti": true,
       "allenamento": true,
       "meditazione": false
+    }
+  },
+  {
+    "date": "2026-07-09",
+    "projects": {
+      "mvp-stories": {
+        "steps": [
+          {
+            "stepId": "mrc56kl3j7bry",
+            "minutes": 0
+          }
+        ]
+      },
+      "studio-ai-agentica": {
+        "steps": [
+          {
+            "stepId": "mr7ct9068aw5",
+            "minutes": 0
+          },
+          {
+            "stepId": "mryc5oge6ksl",
+            "minutes": 0
+          },
+          {
+            "stepId": "mry5tcw8vyp1",
+            "minutes": 0
+          }
+        ]
+      },
+      "personal-branding": {
+        "steps": [
+          {
+            "stepId": "mrcafpnwf9699",
+            "minutes": 0
+          }
+        ]
+      }
+    },
+    "habits": {
+      "porta-avanti-progetti": true
     }
   }
 ]
