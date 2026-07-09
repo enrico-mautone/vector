@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { ProjectsData, Step } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,6 +16,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; projectId: string; onChange: () => void }) {
   const [newStep, setNewStep] = useState('')
   const [bulkText, setBulkText] = useState('')
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
 
   const open = steps.filter((s) => !s.done)
   const done = steps.filter((s) => s.done)
@@ -53,6 +55,26 @@ function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; project
     onChange()
   }
 
+  async function handleDrop(targetId: string) {
+    setDragOverId(null)
+    if (!dragId || dragId === targetId) {
+      setDragId(null)
+      return
+    }
+    const order = open.map((s) => s.id)
+    const fromIndex = order.indexOf(dragId)
+    const toIndex = order.indexOf(targetId)
+    if (fromIndex === -1 || toIndex === -1) {
+      setDragId(null)
+      return
+    }
+    order.splice(fromIndex, 1)
+    order.splice(toIndex, 0, dragId)
+    setDragId(null)
+    await api.reorderSteps(projectId, order.concat(done.map((s) => s.id)))
+    onChange()
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
@@ -70,7 +92,28 @@ function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; project
       <div className="flex flex-col gap-2">
         {open.length === 0 && <p className="text-sm text-muted-foreground">Nessuno step aperto.</p>}
         {open.map((s, i) => (
-          <div key={s.id} className="flex items-center gap-2 rounded-md border px-3 py-2">
+          <div
+            key={s.id}
+            draggable
+            onDragStart={() => setDragId(s.id)}
+            onDragEnd={() => {
+              setDragId(null)
+              setDragOverId(null)
+            }}
+            onDragOver={(e) => {
+              e.preventDefault()
+              if (dragId && dragId !== s.id) setDragOverId(s.id)
+            }}
+            onDragLeave={() => setDragOverId((cur) => (cur === s.id ? null : cur))}
+            onDrop={(e) => {
+              e.preventDefault()
+              handleDrop(s.id)
+            }}
+            className={`flex items-center gap-2 rounded-md border px-3 py-2 ${dragId === s.id ? 'opacity-40' : ''} ${
+              dragOverId === s.id ? 'border-t-2 border-t-primary' : ''
+            }`}
+          >
+            <GripVertical className="size-3.5 shrink-0 cursor-grab text-muted-foreground" />
             <Checkbox checked={false} onCheckedChange={() => handleToggle(s.id)} />
             <span className="flex-1 text-sm">{s.text}</span>
             <Button variant="ghost" size="icon" className="size-7" disabled={i === 0} onClick={() => handleMove(i, -1)}>
