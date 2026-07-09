@@ -527,6 +527,20 @@ app.post('/api/steps/reorder', (req, res) => {
   res.json({ ok: true });
 });
 
+app.post('/api/steps/:id/edit', (req, res) => {
+  const { text } = req.body;
+  if (!text || !text.trim()) {
+    return res.status(400).json({ ok: false });
+  }
+  const steps = readJSON(STEPS_PATH);
+  const step = steps.find((s) => s.id === req.params.id);
+  if (step) {
+    step.text = text.trim();
+    writeJSON(STEPS_PATH, steps);
+  }
+  res.json({ ok: true, step });
+});
+
 app.post('/api/steps/:id/toggle', (req, res) => {
   const steps = readJSON(STEPS_PATH);
   const step = steps.find((s) => s.id === req.params.id);

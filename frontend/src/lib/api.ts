@@ -52,6 +52,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ projectId, order }),
     }),
+  editStep: (id: string, text: string) =>
+    request<{ ok: true }>(`/api/steps/${id}/edit`, {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    }),
   toggleStep: (id: string) => request<{ ok: true }>(`/api/steps/${id}/toggle`, { method: 'POST' }),
   deleteStep: (id: string) => request<{ ok: true }>(`/api/steps/${id}/delete`, { method: 'POST' }),
 

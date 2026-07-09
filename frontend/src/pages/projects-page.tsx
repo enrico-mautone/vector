@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, GripVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { ProjectsData, Step } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,6 +18,8 @@ function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; project
   const [bulkText, setBulkText] = useState('')
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editText, setEditText] = useState('')
 
   const open = steps.filter((s) => !s.done)
   const done = steps.filter((s) => s.done)
@@ -38,6 +40,24 @@ function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; project
 
   async function handleToggle(id: string) {
     await api.toggleStep(id)
+    onChange()
+  }
+
+  function startEdit(s: Step) {
+    setEditingId(s.id)
+    setEditText(s.text)
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditText('')
+  }
+
+  async function saveEdit(id: string) {
+    if (!editText.trim()) return
+    await api.editStep(id, editText.trim())
+    setEditingId(null)
+    setEditText('')
     onChange()
   }
 
@@ -114,23 +134,48 @@ function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; project
             }`}
           >
             <GripVertical className="size-3.5 shrink-0 cursor-grab text-muted-foreground" />
-            <Checkbox checked={false} onCheckedChange={() => handleToggle(s.id)} />
-            <span className="flex-1 text-sm">{s.text}</span>
-            <Button variant="ghost" size="icon" className="size-7" disabled={i === 0} onClick={() => handleMove(i, -1)}>
-              <ArrowUp className="size-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7"
-              disabled={i === open.length - 1}
-              onClick={() => handleMove(i, 1)}
-            >
-              <ArrowDown className="size-3.5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="size-7" onClick={() => handleDelete(s.id)}>
-              <Trash2 className="size-3.5" />
-            </Button>
+            {editingId === s.id ? (
+              <>
+                <Input
+                  autoFocus
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveEdit(s.id)
+                    if (e.key === 'Escape') cancelEdit()
+                  }}
+                  className="h-7 flex-1"
+                />
+                <Button variant="ghost" size="icon" className="size-7" onClick={() => saveEdit(s.id)}>
+                  <Check className="size-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="size-7" onClick={cancelEdit}>
+                  <X className="size-3.5" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <span className="flex-1 text-sm">{s.text}</span>
+                <Button variant="ghost" size="icon" className="size-7" onClick={() => startEdit(s)}>
+                  <Pencil className="size-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="size-7" disabled={i === 0} onClick={() => handleMove(i, -1)}>
+                  <ArrowUp className="size-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7"
+                  disabled={i === open.length - 1}
+                  onClick={() => handleMove(i, 1)}
+                >
+                  <ArrowDown className="size-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="size-7" onClick={() => handleDelete(s.id)}>
+                  <Trash2 className="size-3.5" />
+                </Button>
+              </>
+            )}
           </div>
         ))}
       </div>
