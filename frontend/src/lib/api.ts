@@ -59,9 +59,9 @@ export const api = {
     request<HabitsData>(`/api/habits?${new URLSearchParams(params).toString()}`),
 
   settings: () => request<SettingsData>('/api/settings'),
-  saveSettings: (enforcePriorityOrder: boolean) =>
+  saveSettings: (patch: Partial<{ enforcePriorityOrder: boolean; limitDailyTasksByPriority: boolean }>) =>
     request<{ ok: true }>('/api/settings', {
       method: 'POST',
-      body: JSON.stringify({ enforcePriorityOrder }),
+      body: JSON.stringify(patch),
     }),
 }

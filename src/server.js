@@ -174,14 +174,23 @@ function stepsLoggedToday(todayEntry, projectId) {
   return (todayEntry.projects[projectId] && todayEntry.projects[projectId].steps) || [];
 }
 
+// Progetti "attivi" (non archiviati, con almeno uno step nel backlog),
+// ordinati per priorità crescente (1 = più importante). È la base sia del
+// gate "Lo devi fare!!!!" sia del gate "Non esagerare!!": quando un
+// progetto viene archiviato sparisce da questa lista e tutti quelli dopo
+// di lui risalgono di posizione automaticamente.
+function activeProjectsByPriority(config, steps) {
+  return config.projects
+    .filter((p) => !p.archived && steps.some((s) => s.projectId === p.id))
+    .sort((a, b) => a.priority - b.priority);
+}
+
 // Con "Lo devi fare!!!!" attivo: non si può registrare uno step su un
 // progetto se un progetto a priorità maggiore (numero più basso) non ha
 // ancora nessuno step registrato oggi. Ritorna il primo conflitto trovato
 // (progetto bloccante a priorità maggiore + progetto bloccato), o null.
 function checkPriorityGate(config, loggedStepsByProject, steps) {
-  const sorted = config.projects
-    .filter((p) => !p.archived && steps.some((s) => s.projectId === p.id))
-    .sort((a, b) => a.priority - b.priority);
+  const sorted = activeProjectsByPriority(config, steps);
   let blocker = null;
   for (const p of sorted) {
     const hasSteps = (loggedStepsByProject[p.id] || []).length > 0;
@@ -190,6 +199,33 @@ function checkPriorityGate(config, loggedStepsByProject, steps) {
     } else if (blocker) {
       return { blockedProject: p, blockingProject: blocker };
     }
+  }
+  return null;
+}
+
+// Con "Non esagerare!!" attivo: limite giornaliero di step completabili per
+// progetto, inversamente proporzionale alla posizione di priorità tra i
+// progetti attivi (1ª posizione: 5 step/giorno, 2ª: 4, ... 5ª: 1). Dalla 6ª
+// posizione in poi il limite è 0 — resta bloccato finché uno dei primi 5
+// non viene archiviato (a quel punto la sua posizione risale e ottiene un
+// limite). Ipotesi di Enrico: i progetti a priorità più bassa sono i più
+// "divertenti", quindi senza un tetto rischiano di assorbire tutto il tempo
+// una volta sbloccati.
+function dailyTaskLimitForRank(rank) {
+  const limit = 6 - rank;
+  return limit > 0 ? limit : 0;
+}
+
+// Ritorna { rank, limit } se il progetto ha già raggiunto il limite
+// giornaliero di step, altrimenti null.
+function checkDailyTaskLimitGate(config, steps, todayEntry, projectId) {
+  const ranked = activeProjectsByPriority(config, steps);
+  const rank = ranked.findIndex((p) => p.id === projectId) + 1;
+  if (rank === 0) return null;
+  const limit = dailyTaskLimitForRank(rank);
+  const doneToday = stepsLoggedToday(todayEntry, projectId).length;
+  if (doneToday >= limit) {
+    return { rank, limit };
   }
   return null;
 }
@@ -255,11 +291,12 @@ function buildHomeData(quote) {
   // per stato del giorno), così spuntare un'attività non fa "saltare" i
   // progetti in lista.
   let priorAllDone = true;
-  const actionsToday = config.projects
-    .filter((p) => !p.archived && steps.some((s) => s.projectId === p.id))
-    .sort((a, b) => a.priority - b.priority)
-    .map((p) => {
-      const doneToday = stepsLoggedToday(todayEntry, p.id).length > 0;
+  const ranked = activeProjectsByPriority(config, steps);
+  const actionsToday = ranked
+    .map((p, i) => {
+      const rank = i + 1;
+      const completedTodayCount = stepsLoggedToday(todayEntry, p.id).length;
+      const doneToday = completedTodayCount > 0;
       const last = lastDoneDate(log, p.id, today);
       const daysSince = last ? daysBetween(last, today) : null;
       const urgent = !doneToday && (daysSince === null || daysSince >= config.urgencyThresholdDays);
@@ -276,6 +313,9 @@ function buildHomeData(quote) {
         hasBacklog,
         nextStepId: nextStep ? nextStep.id : null,
         nextStepText: nextStep ? nextStep.text : null,
+        priorityRank: rank,
+        dailyTaskLimit: dailyTaskLimitForRank(rank),
+        completedTodayCount,
       };
     })
     .sort((a, b) => {
@@ -300,7 +340,8 @@ app.get('/api/home', async (req, res) => {
 // Segna eseguito, direttamente da home, il prossimo step aperto di un
 // progetto: stesso effetto di spuntarlo in /log (marca `done` in
 // steps.json + lo registra nel log di oggi), ma un solo step alla volta.
-// Rispetta il gate di priorità se "Lo devi fare!!!!" è attivo.
+// Rispetta il gate di priorità se "Lo devi fare!!!!" è attivo, e il tetto
+// giornaliero per progetto se "Non esagerare!!" è attivo.
 app.post('/api/home/complete-step', (req, res) => {
   const { projectId, stepId } = req.body;
   const config = readJSON(CONFIG_PATH);
@@ -324,6 +365,17 @@ app.post('/api/home/complete-step', (req, res) => {
     const violation = checkPriorityGate(config, loggedStepsByProject, steps);
     if (violation) {
       const error = `"Lo devi fare!!!!" è attivo: registra prima almeno uno step su "${violation.blockingProject.name}" (priorità più alta) prima di registrarne su "${violation.blockedProject.name}".`;
+      return res.status(400).json({ ok: false, error });
+    }
+  }
+
+  if (config.limitDailyTasksByPriority) {
+    const violation = checkDailyTaskLimitGate(config, steps, todayEntry, projectId);
+    if (violation) {
+      const error =
+        violation.limit === 0
+          ? `"Non esagerare!!" è attivo: questo progetto è oltre i primi 5 per priorità, resta bloccato finché non termini uno dei primi 5.`
+          : `"Non esagerare!!" è attivo: hai già completato ${violation.limit} step oggi su questo progetto (${violation.rank}ª posizione per priorità), il limite giornaliero.`;
       return res.status(400).json({ ok: false, error });
     }
   }
@@ -541,7 +593,12 @@ app.get('/api/settings', (req, res) => {
 
 app.post('/api/settings', (req, res) => {
   const config = readJSON(CONFIG_PATH);
-  config.enforcePriorityOrder = req.body.enforcePriorityOrder === true;
+  if ('enforcePriorityOrder' in req.body) {
+    config.enforcePriorityOrder = req.body.enforcePriorityOrder === true;
+  }
+  if ('limitDailyTasksByPriority' in req.body) {
+    config.limitDailyTasksByPriority = req.body.limitDailyTasksByPriority === true;
+  }
   writeJSON(CONFIG_PATH, config);
   res.json({ ok: true, config });
 });

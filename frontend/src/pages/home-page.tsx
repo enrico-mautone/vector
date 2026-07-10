@@ -47,6 +47,12 @@ function VectorLine({ data }: { data: HomeData }) {
             "Lo devi fare!!!" è attivo — l'ordine di priorità è vincolante.
           </div>
         )}
+        {data.config.limitDailyTasksByPriority && (
+          <div className="mt-1 flex items-center gap-2 rounded-md border border-destructive bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+            <AlertTriangle className="size-4 shrink-0" />
+            "Non esagerare!!" è attivo — tetto giornaliero di step per progetto in base alla priorità.
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <div className="flex items-center overflow-x-auto pb-2">
@@ -94,7 +100,10 @@ function ActionCard({
 }) {
   const [pending, setPending] = useState(false)
   const [confirmFinish, setConfirmFinish] = useState(false)
-  const blocked = data.config.enforcePriorityOrder && !project.workable && !project.doneToday
+  const priorityBlocked = data.config.enforcePriorityOrder && !project.workable && !project.doneToday
+  const limitReached = project.completedTodayCount >= project.dailyTaskLimit
+  const limitBlocked = data.config.limitDailyTasksByPriority && limitReached
+  const blocked = priorityBlocked || limitBlocked
 
   async function handleComplete() {
     if (!project.nextStepId) return
@@ -140,6 +149,13 @@ function ActionCard({
             </Badge>
           )}
           {!project.doneToday && project.urgent && <Badge variant="destructive">Urgente</Badge>}
+          {data.config.limitDailyTasksByPriority && (
+            <Badge variant={limitReached ? 'destructive' : 'outline'} className="font-mono">
+              {project.dailyTaskLimit === 0
+                ? 'bloccato'
+                : `${project.completedTodayCount}/${project.dailyTaskLimit} oggi`}
+            </Badge>
+          )}
         </div>
         <CardDescription>
           {project.daysSince === null

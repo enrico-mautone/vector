@@ -15,6 +15,7 @@ export interface Config {
   habits: Habit[]
   urgencyThresholdDays: number
   enforcePriorityOrder: boolean
+  limitDailyTasksByPriority: boolean
 }
 
 export interface Quote {
@@ -30,6 +31,9 @@ export interface ActionProject extends Project {
   hasBacklog: boolean
   nextStepId: string | null
   nextStepText: string | null
+  priorityRank: number
+  dailyTaskLimit: number
+  completedTodayCount: number
 }
 
 export interface HabitStatus extends Habit {

@@ -1,6 +1,7 @@
 {
   "urgencyThresholdDays": 2,
   "enforcePriorityOrder": true,
+  "limitDailyTasksByPriority": false,
   "projects": [
     {
       "id": "mvp-stories",
