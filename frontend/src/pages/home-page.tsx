@@ -107,6 +107,10 @@ function ActionCard({
 
   async function handleComplete() {
     if (!project.nextStepId) return
+    if (limitBlocked) {
+      toast.error('Non fare il furbo!!!')
+      return
+    }
     setPending(true)
     try {
       await api.completeStep(project.id, project.nextStepId)
@@ -174,7 +178,7 @@ function ActionCard({
           <p className="text-sm text-muted-foreground">Nessuno step in backlog. Aggiungine uno in Progetti.</p>
         )}
         {project.nextStepId ? (
-          <Button size="sm" disabled={pending || blocked} onClick={handleComplete}>
+          <Button size="sm" disabled={pending || priorityBlocked} onClick={handleComplete}>
             Segna fatto
           </Button>
         ) : project.hasBacklog ? (
