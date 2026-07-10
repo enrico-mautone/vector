@@ -45,24 +45,6 @@ export interface HomeData {
   config: Config
 }
 
-export interface DisplayStep {
-  id: string
-  text: string
-  checkedToday: boolean
-  minutesToday: number | ''
-}
-
-export interface LogProject extends Project {
-  displaySteps: DisplayStep[]
-}
-
-export interface LogData {
-  projects: LogProject[]
-  config: Config
-  todayEntry: { projects: Record<string, { steps: { stepId: string; minutes: number }[] }>; habits: Record<string, boolean> }
-  today: string
-}
-
 export interface Step {
   id: string
   projectId: string

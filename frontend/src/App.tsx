@@ -5,14 +5,12 @@ import { Separator } from '@/components/ui/separator'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from '@/components/ui/sonner'
 import { HomePage } from '@/pages/home-page'
-import { LogPage } from '@/pages/log-page'
 import { ProjectsPage } from '@/pages/projects-page'
 import { HabitsPage } from '@/pages/habits-page'
 import { SettingsPage } from '@/pages/settings-page'
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   '/': { title: 'Oggi', subtitle: 'Dove punta la giornata' },
-  '/log': { title: 'Registra', subtitle: 'Segna gli step fatti oggi' },
   '/projects': { title: 'Progetti', subtitle: 'Backlog per progetto' },
   '/habits': { title: 'Abitudini', subtitle: 'Costanza nel tempo' },
   '/settings': { title: 'Impostazioni', subtitle: 'Regole di Vector' },
@@ -43,7 +41,6 @@ function App() {
           <div className="flex flex-1 flex-col gap-6 p-6">
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/log" element={<LogPage />} />
               <Route path="/projects" element={<ProjectsPage />} />
               <Route path="/habits" element={<HabitsPage />} />
               <Route path="/settings" element={<SettingsPage />} />

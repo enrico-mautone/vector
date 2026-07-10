@@ -1,4 +1,4 @@
-import type { HabitsData, HomeData, LogData, ProjectsData, SettingsData } from './types'
+import type { HabitsData, HomeData, ProjectsData, SettingsData } from './types'
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -28,13 +28,6 @@ export const api = {
     request<{ ok: true; done: boolean; streak: number }>('/api/home/toggle-habit', {
       method: 'POST',
       body: JSON.stringify({ habitId }),
-    }),
-
-  log: () => request<LogData>('/api/log'),
-  saveLog: (steps: { stepId: string; minutes: number }[], habits: Record<string, boolean>) =>
-    request<{ ok: true }>('/api/log', {
-      method: 'POST',
-      body: JSON.stringify({ steps, habits }),
     }),
 
   addStep: (projectId: string, text: string) =>

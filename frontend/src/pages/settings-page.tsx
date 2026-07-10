@@ -30,7 +30,7 @@ export function SettingsPage() {
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Ordine di priorità</CardTitle>
-        <CardDescription>Regole che Vector applica in Registra e Oggi</CardDescription>
+        <CardDescription>Regole che Vector applica in Oggi</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-between gap-4 rounded-md border p-4">

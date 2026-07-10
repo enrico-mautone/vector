@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { Compass, ListChecks, NotebookPen, Repeat, Settings } from 'lucide-react'
+import { Compass, ListChecks, Repeat, Settings } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +15,6 @@ import {
 
 const NAV_ITEMS = [
   { to: '/', label: 'Oggi', icon: Compass, end: true },
-  { to: '/log', label: 'Registra', icon: NotebookPen, end: false },
   { to: '/projects', label: 'Progetti', icon: ListChecks, end: false },
   { to: '/habits', label: 'Abitudini', icon: Repeat, end: false },
 ]

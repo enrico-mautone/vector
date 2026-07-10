@@ -174,37 +174,6 @@ function stepsLoggedToday(todayEntry, projectId) {
   return (todayEntry.projects[projectId] && todayEntry.projects[projectId].steps) || [];
 }
 
-function buildLogProjects(config, steps, todayEntry) {
-  return config.projects.map((p) => {
-    const loggedToday = stepsLoggedToday(todayEntry, p.id);
-    const loggedById = new Map(loggedToday.map((s) => [s.stepId, s.minutes]));
-    const displaySteps = steps
-      .filter((s) => s.projectId === p.id && (!s.done || loggedById.has(s.id)))
-      .map((s) => ({
-        id: s.id,
-        text: s.text,
-        checkedToday: loggedById.has(s.id),
-        minutesToday: loggedById.has(s.id) ? loggedById.get(s.id) : '',
-      }));
-    return { ...p, displaySteps };
-  });
-}
-
-// Raggruppa gli step selezionati (array di { stepId, minutes }) per progetto,
-// risolvendo il progetto di ciascuno step tramite steps.json.
-function groupLoggedStepsByProject(config, steps, loggedSteps) {
-  const stepsById = new Map(steps.map((s) => [s.id, s]));
-  const loggedStepsByProject = {};
-  config.projects.forEach((p) => { loggedStepsByProject[p.id] = []; });
-  (loggedSteps || []).forEach(({ stepId, minutes }) => {
-    const step = stepsById.get(stepId);
-    if (!step) return;
-    const m = Number.isFinite(minutes) ? minutes : parseInt(minutes, 10) || 0;
-    loggedStepsByProject[step.projectId].push({ stepId, minutes: m });
-  });
-  return loggedStepsByProject;
-}
-
 // Con "Lo devi fare!!!!" attivo: non si può registrare uno step su un
 // progetto se un progetto a priorità maggiore (numero più basso) non ha
 // ancora nessuno step registrato oggi. Ritorna il primo conflitto trovato
@@ -428,59 +397,6 @@ app.post('/api/home/toggle-habit', (req, res) => {
   writeJSON(LOG_PATH, log);
 
   res.json({ ok: true, done, streak: habitStreak(log, habitId, today) });
-});
-
-app.get('/api/log', (req, res) => {
-  const config = readJSON(CONFIG_PATH);
-  const log = readJSON(LOG_PATH);
-  const steps = readJSON(STEPS_PATH);
-  const today = todayStr();
-  const todayEntry = getEntry(log, today) || { projects: {}, habits: {} };
-
-  const projects = buildLogProjects(config, steps, todayEntry);
-
-  res.json({ projects, config, todayEntry, today });
-});
-
-// body: { steps: [{ stepId, minutes }], habits: { [habitId]: boolean } }
-app.post('/api/log', (req, res) => {
-  const config = readJSON(CONFIG_PATH);
-  const log = readJSON(LOG_PATH);
-  const steps = readJSON(STEPS_PATH);
-  const today = todayStr();
-
-  const loggedStepsByProject = groupLoggedStepsByProject(config, steps, req.body.steps);
-
-  if (config.enforcePriorityOrder) {
-    const violation = checkPriorityGate(config, loggedStepsByProject, steps);
-    if (violation) {
-      const error = `"Lo devi fare!!!!" è attivo: registra prima almeno uno step su "${violation.blockingProject.name}" (priorità più alta) prima di registrarne su "${violation.blockedProject.name}".`;
-      return res.status(400).json({ ok: false, error });
-    }
-  }
-
-  config.projects.forEach((p) => {
-    loggedStepsByProject[p.id].forEach(({ stepId }) => {
-      const step = steps.find((s) => s.id === stepId);
-      if (step) step.done = true;
-    });
-  });
-  writeJSON(STEPS_PATH, steps);
-
-  const habits = { ...(req.body.habits || {}) };
-
-  const projects = Object.fromEntries(
-    Object.entries(loggedStepsByProject).map(([id, s]) => [id, { steps: s }])
-  );
-  const entry = { date: today, projects, habits };
-  const existingIndex = log.findIndex((e) => e.date === today);
-  if (existingIndex >= 0) {
-    log[existingIndex] = entry;
-  } else {
-    log.push(entry);
-  }
-  writeJSON(LOG_PATH, log);
-  res.json({ ok: true });
 });
 
 app.post('/api/steps/add', (req, res) => {
