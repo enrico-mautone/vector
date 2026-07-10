@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CheckCircle2, Flame, Quote as QuoteIcon } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Flame, Quote as QuoteIcon } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { HomeData } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,11 +24,29 @@ import { toast } from 'sonner'
 
 function VectorLine({ data }: { data: HomeData }) {
   const projects = data.actionsToday
+  const today = new Date().toLocaleDateString('it-IT', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
   return (
     <Card className="gap-4">
       <CardHeader>
-        <CardTitle className="text-base">La rotta di oggi</CardTitle>
-        <CardDescription>Ordine di priorità · in evidenza il prossimo su cui lavorare</CardDescription>
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <CardTitle className="text-base">La rotta di oggi</CardTitle>
+            <CardDescription>Ordine di priorità · in evidenza il prossimo su cui lavorare</CardDescription>
+          </div>
+          <Badge variant="outline" className="shrink-0 font-mono capitalize">
+            {today}
+          </Badge>
+        </div>
+        {data.config.enforcePriorityOrder && (
+          <div className="mt-1 flex items-center gap-2 rounded-md border border-destructive bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+            <AlertTriangle className="size-4 shrink-0" />
+            "Lo devi fare!!!" è attivo — l'ordine di priorità è vincolante.
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <div className="flex items-center overflow-x-auto pb-2">
