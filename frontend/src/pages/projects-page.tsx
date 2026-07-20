@@ -12,6 +12,15 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 
 function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; projectId: string; onChange: () => void }) {
   const [newStep, setNewStep] = useState('')
@@ -211,8 +220,56 @@ function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; project
   )
 }
 
+function AddProjectDialog({ onAdded }: { onAdded: () => void }) {
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [pending, setPending] = useState(false)
+
+  async function handleCreate() {
+    if (!name.trim()) return
+    setPending(true)
+    try {
+      await api.addProject(name.trim())
+      setName('')
+      setOpen(false)
+      onAdded()
+    } catch {
+      toast.error('Non riesco a creare il progetto.')
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button variant="outline" size="icon" aria-label="Nuovo progetto" />}>
+        <Plus />
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Nuovo progetto</DialogTitle>
+          <DialogDescription>Verrà aggiunto in coda, con l'ultima priorità.</DialogDescription>
+        </DialogHeader>
+        <Input
+          placeholder="Nome del progetto…"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+        />
+        <DialogFooter>
+          <Button disabled={pending || !name.trim()} onClick={handleCreate}>
+            Crea
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function ProjectsPage() {
   const [data, setData] = useState<ProjectsData | null>(null)
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
 
   function load() {
     api.projects().then(setData).catch(() => toast.error('Non riesco a caricare Progetti.'))
@@ -222,17 +279,62 @@ export function ProjectsPage() {
 
   if (!data) return <Skeleton className="h-96 w-full" />
 
+  async function handleDrop(targetId: string) {
+    setDragOverId(null)
+    if (!data || !dragId || dragId === targetId) {
+      setDragId(null)
+      return
+    }
+    const order = data.projects.map((p) => p.id)
+    const fromIndex = order.indexOf(dragId)
+    const toIndex = order.indexOf(targetId)
+    if (fromIndex === -1 || toIndex === -1) {
+      setDragId(null)
+      return
+    }
+    order.splice(fromIndex, 1)
+    order.splice(toIndex, 0, dragId)
+    setDragId(null)
+    await api.reorderProjects(order)
+    load()
+  }
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Backlog per progetto</CardTitle>
-        <CardDescription>In ordine di priorità</CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between gap-2">
+        <div>
+          <CardTitle className="text-base">Backlog per progetto</CardTitle>
+          <CardDescription>In ordine di priorità — trascina per riordinare</CardDescription>
+        </div>
+        <AddProjectDialog onAdded={load} />
       </CardHeader>
       <CardContent>
         <Tabs defaultValue={data.projects[0]?.id}>
           <TabsList>
             {data.projects.map((p) => (
-              <TabsTrigger key={p.id} value={p.id} className="gap-1.5">
+              <TabsTrigger
+                key={p.id}
+                value={p.id}
+                draggable
+                onDragStart={() => setDragId(p.id)}
+                onDragEnd={() => {
+                  setDragId(null)
+                  setDragOverId(null)
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  if (dragId && dragId !== p.id) setDragOverId(p.id)
+                }}
+                onDragLeave={() => setDragOverId((cur) => (cur === p.id ? null : cur))}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  handleDrop(p.id)
+                }}
+                className={`gap-1.5 cursor-grab ${dragId === p.id ? 'opacity-40' : ''} ${
+                  dragOverId === p.id ? 'border-l-2 border-l-primary' : ''
+                }`}
+              >
+                <GripVertical className="size-3.5 shrink-0 text-muted-foreground" />
                 <Badge variant="outline" className="font-mono">
                   {p.priority}
                 </Badge>

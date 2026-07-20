@@ -1,7 +1,7 @@
 {
   "urgencyThresholdDays": 2,
   "enforcePriorityOrder": true,
-  "limitDailyTasksByPriority": false,
+  "limitDailyTasksByPriority": true,
   "projects": [
     {
       "id": "mvp-stories",
@@ -11,7 +11,7 @@
     {
       "id": "studio-ai-agentica",
       "name": "Studio AI Agentica",
-      "priority": 2
+      "priority": 4
     },
     {
       "id": "personal-branding",
@@ -21,12 +21,22 @@
     {
       "id": "shoebox",
       "name": "ShoeBox",
-      "priority": 4
+      "priority": 7
     },
     {
       "id": "vector",
       "name": "Vector",
+      "priority": 2
+    },
+    {
+      "id": "mrg69npj7p0l9",
+      "name": "PurpleSwan",
       "priority": 5
+    },
+    {
+      "id": "mrg7borkk3teu",
+      "name": "Altro",
+      "priority": 6
     }
   ],
   "habits": [

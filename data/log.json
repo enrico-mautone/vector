@@ -114,6 +114,14 @@
           {
             "stepId": "mrc56kl3alt2q",
             "minutes": 0
+          },
+          {
+            "stepId": "mrc56kl317hmi",
+            "minutes": 0
+          },
+          {
+            "stepId": "mrc56kl33nyur",
+            "minutes": 0
           }
         ]
       },
@@ -130,11 +138,19 @@
           {
             "stepId": "mry5tcw8vyp1",
             "minutes": 0
+          },
+          {
+            "stepId": "mraotfr9kr87",
+            "minutes": 0
           }
         ]
       },
       "personal-branding": {
         "steps": [
+          {
+            "stepId": "mrcafpnwf9699",
+            "minutes": 0
+          },
           {
             "stepId": "mrcafpnwf9699",
             "minutes": 0
@@ -146,6 +162,44 @@
           {
             "stepId": "mrc8x58ibw9i8",
             "minutes": 0
+          },
+          {
+            "stepId": "mrdok9zoipjfp",
+            "minutes": 0
+          },
+          {
+            "stepId": "mrdoka23zjprt",
+            "minutes": 0
+          },
+          {
+            "stepId": "mrdopl5ecwub2",
+            "minutes": 0
+          },
+          {
+            "stepId": "mrdpfuhpnn4k7",
+            "minutes": 0
+          }
+        ]
+      }
+    },
+    "habits": {
+      "porta-avanti-progetti": true,
+      "allenamento": true,
+      "meditazione": true
+    }
+  },
+  {
+    "date": "2026-07-10",
+    "projects": {
+      "mvp-stories": {
+        "steps": [
+          {
+            "stepId": "mrc56kl3h7wke",
+            "minutes": 0
+          },
+          {
+            "stepId": "mrf0emp9dlx9j",
+            "minutes": 0
           }
         ]
       }
@@ -154,5 +208,83 @@
       "porta-avanti-progetti": true,
       "allenamento": true
     }
+  },
+  {
+    "projects": {
+      "mvp-stories": {
+        "steps": [
+          {
+            "stepId": "mrffid7igjtqz",
+            "minutes": 0
+          }
+        ]
+      },
+      "studio-ai-agentica": {
+        "steps": [
+          {
+            "stepId": "mrf38lpdumnzs",
+            "minutes": 0
+          },
+          {
+            "stepId": "mrf38lpd7n9g9",
+            "minutes": 0
+          },
+          {
+            "stepId": "mrf38lpdw0n01",
+            "minutes": 0
+          },
+          {
+            "stepId": "mrf38lpd3nmkd",
+            "minutes": 0
+          }
+        ]
+      },
+      "vector": {
+        "steps": [
+          {
+            "stepId": "mrg6c0jlo013d",
+            "minutes": 0
+          }
+        ]
+      },
+      "mrg69npj7p0l9": {
+        "steps": [
+          {
+            "stepId": "mrg6lczntkvoi",
+            "minutes": 0
+          },
+          {
+            "stepId": "mrg6kzbkwilad",
+            "minutes": 0
+          }
+        ]
+      },
+      "personal-branding": {
+        "steps": [
+          {
+            "stepId": "mrcafpnwt0mc0",
+            "minutes": 0
+          }
+        ]
+      }
+    },
+    "habits": {
+      "porta-avanti-progetti": true
+    },
+    "date": "2026-07-11"
+  },
+  {
+    "projects": {
+      "mvp-stories": {
+        "steps": [
+          {
+            "stepId": "mrsvs75zuepoo",
+            "minutes": 0
+          }
+        ]
+      }
+    },
+    "habits": {},
+    "date": "2026-07-20"
   }
 ]

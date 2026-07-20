@@ -1,68 +1,5 @@
 [
   {
-    "id": "mr9gwn6py85iz",
-    "projectId": "studio-ai-agentica",
-    "text": "Definire primo progetto agentico (10min)",
-    "done": true,
-    "createdAt": "2026-07-06T17:02:05.665Z"
-  },
-  {
-    "id": "mr9gwrqdlkj2j",
-    "projectId": "studio-ai-agentica",
-    "text": "Pianificare gli step (10min)",
-    "done": true,
-    "createdAt": "2026-07-06T17:02:11.557Z"
-  },
-  {
-    "id": "mr9gvkzhbe4y7",
-    "projectId": "mvp-stories",
-    "text": "Creare specifica MVP (20min)",
-    "done": true,
-    "createdAt": "2026-07-06T17:01:16.157Z"
-  },
-  {
-    "id": "mrc56kl3j7bry",
-    "projectId": "mvp-stories",
-    "text": "Fork & setup Hermes Agent",
-    "done": true,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
-    "id": "mrc56kl3z8ngz",
-    "projectId": "mvp-stories",
-    "text": "Login anziano",
-    "done": true,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
-    "id": "mrc56kl3alt2q",
-    "projectId": "mvp-stories",
-    "text": "Partizionamento memoria per account",
-    "done": true,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
-    "id": "mrc56kl317hmi",
-    "projectId": "mvp-stories",
-    "text": "Pipeline vocale (STT + TTS)",
-    "done": false,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
-    "id": "mrc56kl33nyur",
-    "projectId": "mvp-stories",
-    "text": "Elaborazione messaggi via LLM (OpenRouter/Groq)",
-    "done": false,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
-    "id": "mrc56kl3h7wke",
-    "projectId": "mvp-stories",
-    "text": "UI web minimale per la conversazione",
-    "done": false,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
     "id": "mr9ge965x6j88",
     "projectId": "personal-branding",
     "text": "Interview con Claude Code per definire copy e struttura della sezione Chi sono (15 min)",
@@ -122,76 +59,34 @@
     "id": "mrcafpnwf9699",
     "projectId": "personal-branding",
     "text": "Articolo blog - 09/07/2026",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
   {
     "id": "mrcafpnwt0mc0",
     "projectId": "personal-branding",
-    "text": "Articolo blog - 10/07/2026",
-    "done": false,
+    "text": "Articolo blog - 10/07/2026 - come si fnno i preventivi nell'era dell'AI?",
+    "done": true,
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
   {
     "id": "mrcafpnwjhj9o",
     "projectId": "personal-branding",
-    "text": "Articolo blog - 13/07/2026",
+    "text": "Articolo blog - 21/07/2026 - Ho chiesto alla mia Board of Advisors AI di progettare il mio focus",
     "done": false,
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
   {
     "id": "mrcafpnwtasmc",
     "projectId": "personal-branding",
-    "text": "Articolo blog - 14/07/2026",
-    "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
-  },
-  {
-    "id": "mrcafpnwk6flt",
-    "projectId": "personal-branding",
-    "text": "Articolo blog - 15/07/2026",
-    "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
-  },
-  {
-    "id": "mrcafpnwvcdrh",
-    "projectId": "personal-branding",
-    "text": "Articolo blog - 16/07/2026",
-    "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
-  },
-  {
-    "id": "mrcafpnw9nncs",
-    "projectId": "personal-branding",
-    "text": "Articolo blog - 17/07/2026",
+    "text": "Articolo blog - 22/07/2026 - Ho quasi abbandonato il mio progetto il giorno stesso in cui l'ho iniziato",
     "done": false,
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
   {
     "id": "mrcafpnwsxcet",
     "projectId": "personal-branding",
-    "text": "Articolo blog - 20/07/2026",
-    "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
-  },
-  {
-    "id": "mrcafpnwbv4c3",
-    "projectId": "personal-branding",
-    "text": "Articolo blog - 21/07/2026",
-    "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
-  },
-  {
-    "id": "mrcafpnwet0gw",
-    "projectId": "personal-branding",
-    "text": "Articolo blog - 22/07/2026",
-    "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
-  },
-  {
-    "id": "mrcafpnw9a9up",
-    "projectId": "personal-branding",
-    "text": "Articolo blog - 23/07/2026",
+    "text": "Articolo blog - 23/07/2026 - La decisione di design più importante di Vector: l'algoritmo non decide le priorità, io sì",
     "done": false,
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
@@ -205,14 +100,14 @@
   {
     "id": "mrcafpnwn03nt",
     "projectId": "personal-branding",
-    "text": "Articolo blog - 27/07/2026",
+    "text": "Articolo blog - 27/07/2026 - Ho reso il mio focus visibile come le contribution di GitHub",
     "done": false,
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
   {
     "id": "mrcafpnwpvutr",
     "projectId": "personal-branding",
-    "text": "Articolo blog - 28/07/2026",
+    "text": "Articolo blog - 28/07/2026 - Ho aggiunto un'opzione che mi obbliga a fare le cose in ordine",
     "done": false,
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
@@ -240,14 +135,14 @@
   {
     "id": "mrcafpnwd0pzb",
     "projectId": "personal-branding",
-    "text": "Articolo blog - 03/08/2026",
+    "text": "Articolo blog - 03/08/2026 - Il bug che faceva sparire i miei progetti finiti",
     "done": false,
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
   {
     "id": "mrcafpnwgdnq6",
     "projectId": "personal-branding",
-    "text": "Articolo blog - 04/08/2026",
+    "text": "Articolo blog - 04/08/2026 - Ho migrato tutto il frontend e nel farlo ho quasi perso dati reali",
     "done": false,
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
@@ -275,14 +170,14 @@
   {
     "id": "mrcafpnwgjld0",
     "projectId": "personal-branding",
-    "text": "Articolo blog - 10/08/2026",
+    "text": "Articolo blog - 10/08/2026 - Il mio tool mi impedisce di lavorare troppo sulle cose divertenti",
     "done": false,
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
   {
     "id": "mrcafpnwgw9py",
     "projectId": "personal-branding",
-    "text": "Articolo blog - 11/08/2026",
+    "text": "Articolo blog - 11/08/2026 - Ho costruito il mio \"internal operating system\" prima di sapere che era un framework noto",
     "done": false,
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
@@ -392,11 +287,25 @@
     "createdAt": "2026-07-08T16:24:16.556Z"
   },
   {
-    "id": "mrc8x58ibw9i8",
-    "projectId": "vector",
-    "text": "Refactoring interfaccia",
+    "id": "mrg6lczntkvoi",
+    "projectId": "mrg69npj7p0l9",
+    "text": "Capire come AI può aiutare nella pubblicazione,revisione degli articoli",
     "done": true,
-    "createdAt": "2026-07-08T15:41:50.658Z"
+    "createdAt": "2026-07-11T09:47:46.307Z"
+  },
+  {
+    "id": "mrg6kzbkwilad",
+    "projectId": "mrg69npj7p0l9",
+    "text": "Review articolo - Come trascrivere un audio gratis con Whisper usando Kaggle",
+    "done": true,
+    "createdAt": "2026-07-11T09:47:28.592Z"
+  },
+  {
+    "id": "mrsvx0vhi9qu1",
+    "projectId": "vector",
+    "text": "Aggiunta obiettivi e task ai progetti con formulazione \"Obiettivo x Risultato\"",
+    "done": false,
+    "createdAt": "2026-07-20T07:09:54.989Z"
   },
   {
     "id": "mrc90qmk94u26",
@@ -418,6 +327,251 @@
     "text": "Cosa abbiamo imparato oggi",
     "done": false,
     "createdAt": "2026-07-08T16:26:22.687Z"
+  },
+  {
+    "id": "mrg6c0jlo013d",
+    "projectId": "vector",
+    "text": "Gestione e riodino progetti",
+    "done": true,
+    "createdAt": "2026-07-11T09:40:30.273Z"
+  },
+  {
+    "id": "mrdopl5ecwub2",
+    "projectId": "vector",
+    "text": "fix: il titolo e la favicon nella scheda del browser vanno aggiornati con icona e titolo Vector",
+    "done": true,
+    "createdAt": "2026-07-09T15:51:38.066Z"
+  },
+  {
+    "id": "mrdpfuhpnn4k7",
+    "projectId": "vector",
+    "text": "fix: non compaiono più i toast \"Task Completato !! Bravissimo 1 +10pt!!!\" quando si preme su \"Segna Fatto\" in home.",
+    "done": true,
+    "createdAt": "2026-07-09T16:12:03.229Z"
+  },
+  {
+    "id": "mrdok9zoipjfp",
+    "projectId": "vector",
+    "text": "Fix ordinamento task progetti - perso dragndrop",
+    "done": true,
+    "createdAt": "2026-07-09T15:47:30.324Z"
+  },
+  {
+    "id": "mrdoka23zjprt",
+    "projectId": "vector",
+    "text": "Fix - i task in Vector non sono più modificabili",
+    "done": true,
+    "createdAt": "2026-07-09T15:47:30.411Z"
+  },
+  {
+    "id": "mrc8x58ibw9i8",
+    "projectId": "vector",
+    "text": "Refactoring interfaccia",
+    "done": true,
+    "createdAt": "2026-07-08T15:41:50.658Z"
+  },
+  {
+    "id": "mrt6srop368vx",
+    "projectId": "mvp-stories",
+    "text": "Corso Subagents - Anthropic",
+    "done": false,
+    "createdAt": "2026-07-20T12:14:32.234Z"
+  },
+  {
+    "id": "mrt28gs7d2ttu",
+    "projectId": "mvp-stories",
+    "text": "Studio Materiale di Giada Workshop 1",
+    "done": false,
+    "createdAt": "2026-07-20T10:06:46.519Z"
+  },
+  {
+    "id": "mrsvspa6juxzx",
+    "projectId": "mvp-stories",
+    "text": "Analisi Workshop 2 boosha",
+    "done": false,
+    "createdAt": "2026-07-20T07:06:33.342Z"
+  },
+  {
+    "id": "mrg5yza725dsm",
+    "projectId": "mvp-stories",
+    "text": "08-03 (frontend consent gate)",
+    "done": false,
+    "createdAt": "2026-07-11T09:30:22.111Z"
+  },
+  {
+    "id": "mrsvs75zuepoo",
+    "projectId": "mvp-stories",
+    "text": "Analisi Workshop 1 Boosha",
+    "done": true,
+    "createdAt": "2026-07-20T07:06:09.863Z"
+  },
+  {
+    "id": "mrffid7igjtqz",
+    "projectId": "mvp-stories",
+    "text": "08-famiglia-entita-reale - Sostituisce la costante FAMILY_ID",
+    "done": true,
+    "createdAt": "2026-07-10T21:09:36.990Z"
+  },
+  {
+    "id": "mr9gvkzhbe4y7",
+    "projectId": "mvp-stories",
+    "text": "Creare specifica MVP (20min)",
+    "done": true,
+    "createdAt": "2026-07-06T17:01:16.157Z"
+  },
+  {
+    "id": "mrc56kl3j7bry",
+    "projectId": "mvp-stories",
+    "text": "Fork & setup Hermes Agent",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mrc56kl3z8ngz",
+    "projectId": "mvp-stories",
+    "text": "Login anziano",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mrc56kl3alt2q",
+    "projectId": "mvp-stories",
+    "text": "Partizionamento memoria per account",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mrc56kl317hmi",
+    "projectId": "mvp-stories",
+    "text": "Pipeline vocale (STT + TTS)",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mrc56kl33nyur",
+    "projectId": "mvp-stories",
+    "text": "Elaborazione messaggi via LLM (OpenRouter/Groq)",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mrc56kl3h7wke",
+    "projectId": "mvp-stories",
+    "text": "UI web minimale per la conversazione",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z"
+  },
+  {
+    "id": "mrf0emp9dlx9j",
+    "projectId": "mvp-stories",
+    "text": "Hardening Demo - Voce,modello llm, guardrails, ecc",
+    "done": true,
+    "createdAt": "2026-07-10T14:06:48.429Z"
+  },
+  {
+    "id": "mrt9cb2chob68",
+    "projectId": "studio-ai-agentica",
+    "text": "Corso Anthropic - Claude Cowork",
+    "done": false,
+    "createdAt": "2026-07-20T13:25:43.044Z"
+  },
+  {
+    "id": "mrf38lpda123x",
+    "projectId": "studio-ai-agentica",
+    "text": "2-5. Scrivi la funzione Python e trasformala in tool con il decoratore @tool, includendo docstring chiara, nomi parametri autoesplicativi e type annotation",
+    "done": false,
+    "createdAt": "2026-07-10T15:26:06.049Z"
+  },
+  {
+    "id": "mrf38lpdph3vj",
+    "projectId": "studio-ai-agentica",
+    "text": "2-6. Ispeziona lo schema del tool stampando name, description e args per vedere cosa \"vede\" il modello",
+    "done": false,
+    "createdAt": "2026-07-10T15:26:06.049Z"
+  },
+  {
+    "id": "mrf38lpd74uu7",
+    "projectId": "studio-ai-agentica",
+    "text": "2-7. Collega il tool al modello con ChatGroq e bind_tools",
+    "done": false,
+    "createdAt": "2026-07-10T15:26:06.049Z"
+  },
+  {
+    "id": "mrf38lpdcm1x2",
+    "projectId": "studio-ai-agentica",
+    "text": "2-8. Testa che il modello scelga di chiamare il tool invocando llm_with_tools.invoke() e leggendo tool_calls",
+    "done": false,
+    "createdAt": "2026-07-10T15:26:06.049Z"
+  },
+  {
+    "id": "mrf38lpdcg57p",
+    "projectId": "studio-ai-agentica",
+    "text": "2-9. Esegui il tool con i parametri generati dal modello chiamando get_weather.invoke(args)",
+    "done": false,
+    "createdAt": "2026-07-10T15:26:06.049Z"
+  },
+  {
+    "id": "mrd75h4hqc1rs",
+    "projectId": "studio-ai-agentica",
+    "text": "3. (20 min) Fai una singola chiamata \"tool calling\" senza agent executor. Passa il tool sopra a un modello con tool-calling nativo (OpenAI/Anthropic) e guarda l'output grezzo: il modello decide quale tool chiamare e con che argomenti, ma non lo esegue lui. Eseguilo tu a mano, una volta, manualmente. Questo ti fa capire la distinzione fondamentale tra \"agent\" (il ragionamento) e \"agent executor\" (il loop che esegue).",
+    "done": false,
+    "createdAt": "2026-07-09T07:40:06.257Z"
+  },
+  {
+    "id": "mrd75h4hz9hiz",
+    "projectId": "studio-ai-agentica",
+    "text": "4. (15 min) Leggi (non implementare ancora) il ciclo ReAct. Prendi 15 minuti per capire il pattern Thought → Action → Action Input → Observation, ripetuto. Non serve costruirlo — basta che tu lo riconosca quando lo vedi in LangChain/LangGraph dopo.",
+    "done": false,
+    "createdAt": "2026-07-09T07:40:06.257Z"
+  },
+  {
+    "id": "mrd75h4h9ftwc",
+    "projectId": "studio-ai-agentica",
+    "text": "5. (20 min) Prova create_tool_calling_agent di LangChain (o l'equivalente astratto). Solo per vedere il loop completo funzionare \"a scatola chiusa\" con il tool che hai scritto al punto 2. Non capire l'interno ancora — l'obiettivo è \"vedere qualcosa che funziona\" prima di smontarlo.",
+    "done": false,
+    "createdAt": "2026-07-09T07:40:06.257Z"
+  },
+  {
+    "id": "mrf38lpdumnzs",
+    "projectId": "studio-ai-agentica",
+    "text": "2-1. Installa le dipendenze con pip install jupyter langchain langchain-groq",
+    "done": true,
+    "createdAt": "2026-07-10T15:26:06.049Z"
+  },
+  {
+    "id": "mrf38lpd7n9g9",
+    "projectId": "studio-ai-agentica",
+    "text": "2-2. Ottieni una API key gratuita su console.groq.com/keys",
+    "done": true,
+    "createdAt": "2026-07-10T15:26:06.049Z"
+  },
+  {
+    "id": "mrf38lpdw0n01",
+    "projectId": "studio-ai-agentica",
+    "text": "2-3. Avvia Jupyter Notebook con jupyter notebook",
+    "done": true,
+    "createdAt": "2026-07-10T15:26:06.049Z"
+  },
+  {
+    "id": "mrf38lpd3nmkd",
+    "projectId": "studio-ai-agentica",
+    "text": "2-4. Salva la API key come variabile d'ambiente con os.environ[\"GROQ_API_KEY\"]",
+    "done": true,
+    "createdAt": "2026-07-10T15:26:06.049Z"
+  },
+  {
+    "id": "mr9gwn6py85iz",
+    "projectId": "studio-ai-agentica",
+    "text": "Definire primo progetto agentico (10min)",
+    "done": true,
+    "createdAt": "2026-07-06T17:02:05.665Z"
+  },
+  {
+    "id": "mr9gwrqdlkj2j",
+    "projectId": "studio-ai-agentica",
+    "text": "Pianificare gli step (10min)",
+    "done": true,
+    "createdAt": "2026-07-06T17:02:11.557Z"
   },
   {
     "id": "mr7ct9068aw5",
@@ -444,35 +598,7 @@
     "id": "mraotfr9kr87",
     "projectId": "studio-ai-agentica",
     "text": "1d. (5 min) Annota cosa hai osservato: come ha sbagliato, con quanta sicurezza, e perché questo giustifica servire agenti/RAG.",
-    "done": false,
+    "done": true,
     "createdAt": "2026-07-09T08:36:55.278Z"
-  },
-  {
-    "id": "mrd75h4hz5i4z",
-    "projectId": "studio-ai-agentica",
-    "text": "2. (20 min) Scrivi un singolo tool con @tool. Prendi una funzione Python qualsiasi (una calcolatrice, una funzione meteo finta) e trasformala in un tool con @tool. Concentrati solo su tre cose: docstring chiara in linguaggio naturale, nomi di parametri autoesplicativi, type annotation. Questo schema è letteralmente ciò che il modello \"vede\" — è la base di tutto il resto.",
-    "done": false,
-    "createdAt": "2026-07-09T07:40:06.257Z"
-  },
-  {
-    "id": "mrd75h4hqc1rs",
-    "projectId": "studio-ai-agentica",
-    "text": "3. (20 min) Fai una singola chiamata \"tool calling\" senza agent executor. Passa il tool sopra a un modello con tool-calling nativo (OpenAI/Anthropic) e guarda l'output grezzo: il modello decide quale tool chiamare e con che argomenti, ma non lo esegue lui. Eseguilo tu a mano, una volta, manualmente. Questo ti fa capire la distinzione fondamentale tra \"agent\" (il ragionamento) e \"agent executor\" (il loop che esegue).",
-    "done": false,
-    "createdAt": "2026-07-09T07:40:06.257Z"
-  },
-  {
-    "id": "mrd75h4hz9hiz",
-    "projectId": "studio-ai-agentica",
-    "text": "4. (15 min) Leggi (non implementare ancora) il ciclo ReAct. Prendi 15 minuti per capire il pattern Thought → Action → Action Input → Observation, ripetuto. Non serve costruirlo — basta che tu lo riconosca quando lo vedi in LangChain/LangGraph dopo.",
-    "done": false,
-    "createdAt": "2026-07-09T07:40:06.257Z"
-  },
-  {
-    "id": "mrd75h4h9ftwc",
-    "projectId": "studio-ai-agentica",
-    "text": "5. (20 min) Prova create_tool_calling_agent di LangChain (o l'equivalente astratto). Solo per vedere il loop completo funzionare \"a scatola chiusa\" con il tool che hai scritto al punto 2. Non capire l'interno ancora — l'obiettivo è \"vedere qualcosa che funziona\" prima di smontarlo.",
-    "done": false,
-    "createdAt": "2026-07-09T07:40:06.257Z"
   }
 ]

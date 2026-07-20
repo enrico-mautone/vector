@@ -187,17 +187,19 @@ function activeProjectsByPriority(config, steps) {
 
 // Con "Lo devi fare!!!!" attivo: non si può registrare uno step su un
 // progetto se un progetto a priorità maggiore (numero più basso) non ha
-// ancora nessuno step registrato oggi. Ritorna il primo conflitto trovato
-// (progetto bloccante a priorità maggiore + progetto bloccato), o null.
-function checkPriorityGate(config, loggedStepsByProject, steps) {
+// ancora nessuno step registrato oggi. Guarda solo i progetti con priorità
+// maggiore del progetto su cui si sta registrando lo step (non l'intera
+// lista): un "buco" di priorità più in basso nella lista non deve bloccare
+// il progetto che si sta effettivamente provando a completare.
+function checkPriorityGate(config, loggedStepsByProject, steps, projectId) {
   const sorted = activeProjectsByPriority(config, steps);
-  let blocker = null;
-  for (const p of sorted) {
+  const targetIndex = sorted.findIndex((p) => p.id === projectId);
+  if (targetIndex <= 0) return null;
+  for (let i = 0; i < targetIndex; i++) {
+    const p = sorted[i];
     const hasSteps = (loggedStepsByProject[p.id] || []).length > 0;
     if (!hasSteps) {
-      if (!blocker) blocker = p;
-    } else if (blocker) {
-      return { blockedProject: p, blockingProject: blocker };
+      return { blockedProject: sorted[targetIndex], blockingProject: p };
     }
   }
   return null;
@@ -362,7 +364,7 @@ app.post('/api/home/complete-step', (req, res) => {
   loggedStepsByProject[projectId] = loggedStepsByProject[projectId].concat([{ stepId }]);
 
   if (config.enforcePriorityOrder) {
-    const violation = checkPriorityGate(config, loggedStepsByProject, steps);
+    const violation = checkPriorityGate(config, loggedStepsByProject, steps, projectId);
     if (violation) {
       const error = `"Lo devi fare!!!!" è attivo: registra prima almeno uno step su "${violation.blockingProject.name}" (priorità più alta) prima di registrarne su "${violation.blockedProject.name}".`;
       return res.status(400).json({ ok: false, error });
@@ -584,6 +586,34 @@ app.get('/api/projects', (req, res) => {
       return { ...p, projectSteps };
     });
   res.json({ projects });
+});
+
+app.post('/api/projects/add', (req, res) => {
+  const { name } = req.body;
+  if (!name || !name.trim()) {
+    return res.status(400).json({ ok: false, error: 'Nome progetto mancante.' });
+  }
+  const config = readJSON(CONFIG_PATH);
+  const maxPriority = config.projects.reduce((max, p) => Math.max(max, p.priority), 0);
+  const project = { id: generateId(), name: name.trim(), priority: maxPriority + 1 };
+  config.projects.push(project);
+  writeJSON(CONFIG_PATH, config);
+  res.json({ ok: true, project });
+});
+
+app.post('/api/projects/reorder', (req, res) => {
+  const { order } = req.body;
+  if (!Array.isArray(order)) {
+    return res.status(400).json({ ok: false, error: 'Ordine non valido.' });
+  }
+  const config = readJSON(CONFIG_PATH);
+  const byId = new Map(config.projects.map((p) => [p.id, p]));
+  order.forEach((id, index) => {
+    const project = byId.get(id);
+    if (project) project.priority = index + 1;
+  });
+  writeJSON(CONFIG_PATH, config);
+  res.json({ ok: true, config });
 });
 
 app.get('/api/settings', (req, res) => {
