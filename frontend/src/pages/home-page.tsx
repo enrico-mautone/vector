@@ -200,6 +200,10 @@ function ActionCard({
           <p className="text-sm text-muted-foreground">Obiettivo "{project.activeObjectiveGoal}" completo. Confermi?</p>
         ) : project.allObjectivesDone ? (
           <p className="text-sm text-muted-foreground">Non ci sono più obiettivi. Il progetto è terminato?</p>
+        ) : project.activeObjectiveEmpty ? (
+          <p className="text-sm text-muted-foreground">
+            L'obiettivo attivo "{project.activeObjectiveGoal}" non ha ancora step. Aggiungine uno in Progetti.
+          </p>
         ) : project.hasBacklog ? (
           <p className="text-sm text-muted-foreground">Non ci sono più step. Il progetto è terminato?</p>
         ) : (
@@ -243,6 +247,8 @@ function ActionCard({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+        ) : project.activeObjectiveEmpty ? (
+          null
         ) : null}
       </CardContent>
     </Card>

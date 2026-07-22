@@ -322,6 +322,7 @@ function buildHomeData(quote) {
       const nextStep = activeObjective ? objectiveSteps.find((s) => !s.done) : null;
       const objectiveComplete = !!(activeObjective && objectiveSteps.length > 0 && !nextStep);
       const allObjectivesDone = projectObjectives.length > 0 && activeObjs.length === 0;
+      const activeObjectiveEmpty = !!(activeObjective && objectiveSteps.length === 0);
       const workable = priorAllDone;
       priorAllDone = priorAllDone && (doneToday || !hasBacklog);
       return {
@@ -338,6 +339,7 @@ function buildHomeData(quote) {
         activeObjectiveOutcome: activeObjective ? activeObjective.outcome : null,
         objectiveComplete,
         allObjectivesDone,
+        activeObjectiveEmpty,
         priorityRank: rank,
         dailyTaskLimit: dailyTaskLimitForRank(rank),
         completedTodayCount,

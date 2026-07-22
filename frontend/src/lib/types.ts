@@ -36,6 +36,7 @@ export interface ActionProject extends Project {
   activeObjectiveOutcome: string | null
   objectiveComplete: boolean
   allObjectivesDone: boolean
+  activeObjectiveEmpty: boolean
   priorityRank: number
   dailyTaskLimit: number
   completedTodayCount: number
