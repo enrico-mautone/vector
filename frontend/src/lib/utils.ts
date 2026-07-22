@@ -6,5 +6,5 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatObjective(goal: string, outcome: string | null | undefined) {
-  return `[OBIETTIVO] ${goal} [RISULTATO] ${outcome && outcome.trim() ? outcome : '—'}`
+  return `${goal} X ${outcome && outcome.trim() ? outcome : '—'}`
 }
