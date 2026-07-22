@@ -52,6 +52,11 @@ export const api = {
     }),
   toggleStep: (id: string) => request<{ ok: true }>(`/api/steps/${id}/toggle`, { method: 'POST' }),
   deleteStep: (id: string) => request<{ ok: true }>(`/api/steps/${id}/delete`, { method: 'POST' }),
+  moveStep: (id: string, objectiveId: string) =>
+    request<{ ok: true }>(`/api/steps/${id}/move`, {
+      method: 'POST',
+      body: JSON.stringify({ objectiveId }),
+    }),
 
   projects: () => request<ProjectsData>('/api/projects'),
   addProject: (name: string) =>

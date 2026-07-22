@@ -565,6 +565,27 @@ app.post('/api/steps/:id/delete', (req, res) => {
   res.json({ ok: true });
 });
 
+// Sposta uno step su un altro obiettivo (stesso progetto) via drag & drop.
+app.post('/api/steps/:id/move', (req, res) => {
+  const { objectiveId } = req.body;
+  if (!objectiveId) {
+    return res.status(400).json({ ok: false, error: 'Obiettivo mancante.' });
+  }
+  const steps = readJSON(STEPS_PATH);
+  const step = steps.find((s) => s.id === req.params.id);
+  if (!step) {
+    return res.status(404).json({ ok: false, error: 'Step non trovato.' });
+  }
+  const objectives = readJSON(OBJECTIVES_PATH);
+  const targetObjective = objectives.find((o) => o.id === objectiveId);
+  if (!targetObjective || targetObjective.projectId !== step.projectId) {
+    return res.status(400).json({ ok: false, error: 'Obiettivo non valido per questo progetto.' });
+  }
+  step.objectiveId = objectiveId;
+  writeJSON(STEPS_PATH, steps);
+  res.json({ ok: true, step });
+});
+
 app.get('/api/habits', (req, res) => {
   const config = readJSON(CONFIG_PATH);
   const log = readJSON(LOG_PATH);

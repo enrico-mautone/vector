@@ -1,6 +1,6 @@
 import { useEffect, useState, type DragEvent } from 'react'
 import { toast } from 'sonner'
-import { ArrowDown, ArrowUp, Check, GripVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, GripVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { ProjectsData, Step } from '@/lib/types'
 import { formatObjective } from '@/lib/utils'
@@ -108,22 +108,31 @@ function ProjectBacklog({
     onChange()
   }
 
-  async function handleDrop(targetId: string) {
+  // targetId=null significa "rilascia in fondo alla lista" (drop sul contenitore,
+  // non su un item specifico). Legge dataTransfer per gestire anche il drop di
+  // uno step trascinato da un ALTRO obiettivo (dragId locale non lo conosce).
+  async function handleDrop(targetId: string | null, e: DragEvent) {
+    e.preventDefault()
+    e.stopPropagation()
     setDragOverId(null)
-    if (!dragId || dragId === targetId) {
-      setDragId(null)
-      return
+    let payload: { stepId: string; objectiveId: string } | null = null
+    try {
+      const raw = e.dataTransfer.getData('application/x-step')
+      payload = raw ? JSON.parse(raw) : null
+    } catch {
+      payload = null
     }
-    const order = open.map((s) => s.id)
-    const fromIndex = order.indexOf(dragId)
-    const toIndex = order.indexOf(targetId)
-    if (fromIndex === -1 || toIndex === -1) {
-      setDragId(null)
-      return
-    }
-    order.splice(fromIndex, 1)
-    order.splice(toIndex, 0, dragId)
+    const stepId = payload?.stepId ?? dragId
+    const sourceObjectiveId = payload?.objectiveId ?? objectiveId
     setDragId(null)
+    if (!stepId || stepId === targetId) return
+
+    if (sourceObjectiveId !== objectiveId) {
+      await api.moveStep(stepId, objectiveId)
+    }
+    const order = open.map((s) => s.id).filter((id) => id !== stepId)
+    const toIndex = targetId ? order.indexOf(targetId) : order.length
+    order.splice(toIndex === -1 ? order.length : toIndex, 0, stepId)
     await api.reorderSteps(projectId, order.concat(done.map((s) => s.id)))
     onChange()
   }
@@ -144,13 +153,27 @@ function ProjectBacklog({
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
-        {open.length === 0 && <p className="text-sm text-muted-foreground">Nessuno step aperto.</p>}
+      <div
+        className="flex flex-col gap-2"
+        onDragOver={(e) => {
+          if (readOnly) return
+          e.preventDefault()
+        }}
+        onDrop={(e) => {
+          if (readOnly) return
+          handleDrop(null, e)
+        }}
+      >
+        {open.length === 0 && <p className="text-sm text-muted-foreground">Nessuno step aperto. Trascina qui uno step da un altro obiettivo.</p>}
         {open.map((s, i) => (
           <div
             key={s.id}
             draggable={!readOnly}
-            onDragStart={() => !readOnly && setDragId(s.id)}
+            onDragStart={(e) => {
+              if (readOnly) return
+              setDragId(s.id)
+              e.dataTransfer.setData('application/x-step', JSON.stringify({ stepId: s.id, objectiveId }))
+            }}
             onDragEnd={() => {
               setDragId(null)
               setDragOverId(null)
@@ -158,13 +181,13 @@ function ProjectBacklog({
             onDragOver={(e) => {
               if (readOnly) return
               e.preventDefault()
-              if (dragId && dragId !== s.id) setDragOverId(s.id)
+              e.stopPropagation()
+              if (dragId !== s.id) setDragOverId(s.id)
             }}
             onDragLeave={() => setDragOverId((cur) => (cur === s.id ? null : cur))}
             onDrop={(e) => {
               if (readOnly) return
-              e.preventDefault()
-              handleDrop(s.id)
+              handleDrop(s.id, e)
             }}
             className={`flex items-center gap-2 rounded-md border px-3 py-2 ${dragId === s.id ? 'opacity-40' : ''} ${
               dragOverId === s.id ? 'border-t-2 border-t-primary' : ''
@@ -373,6 +396,8 @@ function ObjectiveSection({
   objective,
   projectId,
   onChange,
+  isOpen,
+  onToggleOpen,
   draggable = false,
   isDragging = false,
   isDragOver = false,
@@ -385,6 +410,8 @@ function ObjectiveSection({
   objective: ProjectsData['projects'][number]['objectives'][number]
   projectId: string
   onChange: () => void
+  isOpen: boolean
+  onToggleOpen: () => void
   draggable?: boolean
   isDragging?: boolean
   isDragOver?: boolean
@@ -426,7 +453,18 @@ function ObjectiveSection({
       } ${draggable && isDragOver ? 'border-t-2 border-t-primary' : ''}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm">{formatObjective(objective.goal, objective.outcome)}</p>
+        <button
+          type="button"
+          onClick={onToggleOpen}
+          className="flex flex-1 items-start gap-2 text-left"
+        >
+          {isOpen ? (
+            <ChevronDown className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          ) : (
+            <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          )}
+          <span className="text-sm">{formatObjective(objective.goal, objective.outcome)}</span>
+        </button>
         <div className="flex items-center gap-2">
           {objective.active && (
             <EditObjectiveDialog
@@ -443,14 +481,23 @@ function ObjectiveSection({
           )}
         </div>
       </div>
-      <ProjectBacklog
-        steps={objective.steps}
-        projectId={projectId}
-        objectiveId={objective.id}
-        readOnly={!objective.active}
-        onChange={onChange}
-      />
-      {canFinish && (
+      {!isOpen && (
+        <p className="pl-6 text-xs text-muted-foreground">
+          {objective.steps.length === 0
+            ? 'Nessuno step.'
+            : `${objective.steps.filter((s) => !s.done).length} aperti su ${objective.steps.length} step`}
+        </p>
+      )}
+      {isOpen && (
+        <>
+          <ProjectBacklog
+            steps={objective.steps}
+            projectId={projectId}
+            objectiveId={objective.id}
+            readOnly={objective.completed}
+            onChange={onChange}
+          />
+          {canFinish && (
         <AlertDialog open={confirmFinish} onOpenChange={setConfirmFinish}>
           <AlertDialogTrigger render={<Button size="sm" variant="outline" className="self-start" />}>
             Segna obiettivo completato
@@ -468,6 +515,8 @@ function ObjectiveSection({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+          )}
+        </>
       )}
     </div>
   )
@@ -525,6 +574,7 @@ export function ProjectsPage() {
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const [objDragId, setObjDragId] = useState<string | null>(null)
   const [objDragOverId, setObjDragOverId] = useState<string | null>(null)
+  const [openOverrides, setOpenOverrides] = useState<Record<string, boolean>>({})
 
   function load() {
     api.projects().then(setData).catch(() => toast.error('Non riesco a caricare Progetti.'))
@@ -633,6 +683,10 @@ export function ProjectsPage() {
                     objective={o}
                     projectId={p.id}
                     onChange={load}
+                    isOpen={openOverrides[o.id] ?? o.active}
+                    onToggleOpen={() =>
+                      setOpenOverrides((prev) => ({ ...prev, [o.id]: !(prev[o.id] ?? o.active) }))
+                    }
                     draggable={queued}
                     isDragging={objDragId === o.id}
                     isDragOver={objDragOverId === o.id}
