@@ -286,5 +286,13 @@
     },
     "habits": {},
     "date": "2026-07-20"
+  },
+  {
+    "date": "2026-07-22",
+    "projects": {},
+    "habits": {
+      "allenamento": true,
+      "porta-avanti-progetti": true
+    }
   }
 ]

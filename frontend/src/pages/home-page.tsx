@@ -99,7 +99,8 @@ function ActionCard({
   onChange: () => void
 }) {
   const [pending, setPending] = useState(false)
-  const [confirmFinish, setConfirmFinish] = useState(false)
+  const [confirmFinishProject, setConfirmFinishProject] = useState(false)
+  const [confirmFinishObjective, setConfirmFinishObjective] = useState(false)
   const priorityBlocked = data.config.enforcePriorityOrder && !project.workable && !project.doneToday
   const limitReached = project.completedTodayCount >= project.dailyTaskLimit
   const limitBlocked = data.config.limitDailyTasksByPriority && limitReached
@@ -123,7 +124,7 @@ function ActionCard({
     }
   }
 
-  async function handleFinish() {
+  async function handleFinishProject() {
     setPending(true)
     try {
       await api.finishProject(project.id)
@@ -133,7 +134,22 @@ function ActionCard({
       toast.error(err instanceof Error ? err.message : 'Errore nel salvataggio.')
     } finally {
       setPending(false)
-      setConfirmFinish(false)
+      setConfirmFinishProject(false)
+    }
+  }
+
+  async function handleFinishObjective() {
+    if (!project.activeObjectiveId) return
+    setPending(true)
+    try {
+      await api.finishObjective(project.activeObjectiveId)
+      toast.success(`Obiettivo "${project.activeObjectiveGoal}" completato.`)
+      onChange()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Errore nel salvataggio.')
+    } finally {
+      setPending(false)
+      setConfirmFinishObjective(false)
     }
   }
 
@@ -171,7 +187,19 @@ function ActionCard({
       </CardHeader>
       <CardContent className="flex items-center justify-between gap-3">
         {project.nextStepText ? (
-          <p className="text-sm">{project.nextStepText}</p>
+          <div className="flex flex-col gap-0.5">
+            {project.activeObjectiveGoal && (
+              <p className="text-xs text-muted-foreground">
+                Obiettivo: {project.activeObjectiveGoal}
+                {project.activeObjectiveOutcome ? ` ${project.activeObjectiveOutcome}` : ''}
+              </p>
+            )}
+            <p className="text-sm">{project.nextStepText}</p>
+          </div>
+        ) : project.objectiveComplete ? (
+          <p className="text-sm text-muted-foreground">Obiettivo "{project.activeObjectiveGoal}" completo. Confermi?</p>
+        ) : project.allObjectivesDone ? (
+          <p className="text-sm text-muted-foreground">Non ci sono più obiettivi. Il progetto è terminato?</p>
         ) : project.hasBacklog ? (
           <p className="text-sm text-muted-foreground">Non ci sono più step. Il progetto è terminato?</p>
         ) : (
@@ -181,19 +209,35 @@ function ActionCard({
           <Button size="sm" disabled={pending || priorityBlocked} onClick={handleComplete}>
             Segna fatto
           </Button>
-        ) : project.hasBacklog ? (
-          <AlertDialog open={confirmFinish} onOpenChange={setConfirmFinish}>
+        ) : project.objectiveComplete ? (
+          <AlertDialog open={confirmFinishObjective} onOpenChange={setConfirmFinishObjective}>
+            <AlertDialogTrigger render={<Button size="sm" variant="outline" />}>Segna obiettivo completato</AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Completare "{project.activeObjectiveGoal}"?</AlertDialogTitle>
+                <AlertDialogDescription>Il prossimo obiettivo per priorità si sbloccherà.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Non ancora</AlertDialogCancel>
+                <AlertDialogAction disabled={pending} onClick={handleFinishObjective}>
+                  Completa
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        ) : project.allObjectivesDone ? (
+          <AlertDialog open={confirmFinishProject} onOpenChange={setConfirmFinishProject}>
             <AlertDialogTrigger render={<Button size="sm" variant="outline" />}>Segna terminato</AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Archiviare "{project.name}"?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Il progetto sparirà da questa vista. Puoi farlo solo quando non ci sono più step aperti.
+                  Il progetto sparirà da questa vista. Puoi farlo solo quando non ci sono più obiettivi aperti.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Non ancora</AlertDialogCancel>
-                <AlertDialogAction disabled={pending} onClick={handleFinish}>
+                <AlertDialogAction disabled={pending} onClick={handleFinishProject}>
                   Archivia
                 </AlertDialogAction>
               </AlertDialogFooter>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type DragEvent } from 'react'
 import { toast } from 'sonner'
 import { ArrowDown, ArrowUp, Check, GripVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { api } from '@/lib/api'
@@ -21,8 +21,31 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
-function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; projectId: string; onChange: () => void }) {
+function ProjectBacklog({
+  steps,
+  projectId,
+  objectiveId,
+  readOnly,
+  onChange,
+}: {
+  steps: Step[]
+  projectId: string
+  objectiveId: string
+  readOnly: boolean
+  onChange: () => void
+}) {
   const [newStep, setNewStep] = useState('')
   const [bulkText, setBulkText] = useState('')
   const [dragId, setDragId] = useState<string | null>(null)
@@ -35,14 +58,14 @@ function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; project
 
   async function handleAdd() {
     if (!newStep.trim()) return
-    await api.addStep(projectId, newStep.trim())
+    await api.addStep(projectId, objectiveId, newStep.trim())
     setNewStep('')
     onChange()
   }
 
   async function handleBulk() {
     if (!bulkText.trim()) return
-    await api.bulkAddSteps(projectId, bulkText)
+    await api.bulkAddSteps(projectId, objectiveId, bulkText)
     setBulkText('')
     onChange()
   }
@@ -106,35 +129,39 @@ function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; project
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-2">
-        <Input
-          placeholder="Aggiungi uno step…"
-          value={newStep}
-          onChange={(e) => setNewStep(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-        />
-        <Button variant="outline" size="icon" onClick={handleAdd} aria-label="Aggiungi step">
-          <Plus />
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="flex gap-2">
+          <Input
+            placeholder="Aggiungi uno step…"
+            value={newStep}
+            onChange={(e) => setNewStep(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+          />
+          <Button variant="outline" size="icon" onClick={handleAdd} aria-label="Aggiungi step">
+            <Plus />
+          </Button>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2">
         {open.length === 0 && <p className="text-sm text-muted-foreground">Nessuno step aperto.</p>}
         {open.map((s, i) => (
           <div
             key={s.id}
-            draggable
-            onDragStart={() => setDragId(s.id)}
+            draggable={!readOnly}
+            onDragStart={() => !readOnly && setDragId(s.id)}
             onDragEnd={() => {
               setDragId(null)
               setDragOverId(null)
             }}
             onDragOver={(e) => {
+              if (readOnly) return
               e.preventDefault()
               if (dragId && dragId !== s.id) setDragOverId(s.id)
             }}
             onDragLeave={() => setDragOverId((cur) => (cur === s.id ? null : cur))}
             onDrop={(e) => {
+              if (readOnly) return
               e.preventDefault()
               handleDrop(s.id)
             }}
@@ -142,7 +169,7 @@ function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; project
               dragOverId === s.id ? 'border-t-2 border-t-primary' : ''
             }`}
           >
-            <GripVertical className="size-3.5 shrink-0 cursor-grab text-muted-foreground" />
+            {!readOnly && <GripVertical className="size-3.5 shrink-0 cursor-grab text-muted-foreground" />}
             {editingId === s.id ? (
               <>
                 <Input
@@ -165,24 +192,28 @@ function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; project
             ) : (
               <>
                 <span className="flex-1 text-sm">{s.text}</span>
-                <Button variant="ghost" size="icon" className="size-7" onClick={() => startEdit(s)}>
-                  <Pencil className="size-3.5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="size-7" disabled={i === 0} onClick={() => handleMove(i, -1)}>
-                  <ArrowUp className="size-3.5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-7"
-                  disabled={i === open.length - 1}
-                  onClick={() => handleMove(i, 1)}
-                >
-                  <ArrowDown className="size-3.5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="size-7" onClick={() => handleDelete(s.id)}>
-                  <Trash2 className="size-3.5" />
-                </Button>
+                {!readOnly && (
+                  <>
+                    <Button variant="ghost" size="icon" className="size-7" onClick={() => startEdit(s)}>
+                      <Pencil className="size-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="size-7" disabled={i === 0} onClick={() => handleMove(i, -1)}>
+                      <ArrowUp className="size-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7"
+                      disabled={i === open.length - 1}
+                      onClick={() => handleMove(i, 1)}
+                    >
+                      <ArrowDown className="size-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="size-7" onClick={() => handleDelete(s.id)}>
+                      <Trash2 className="size-3.5" />
+                    </Button>
+                  </>
+                )}
               </>
             )}
           </div>
@@ -196,26 +227,180 @@ function ProjectBacklog({ steps, projectId, onChange }: { steps: Step[]; project
             <p className="text-xs text-muted-foreground">Completati</p>
             {done.map((s) => (
               <div key={s.id} className="flex items-center gap-2 rounded-md border border-dashed px-3 py-2 opacity-60">
-                <Checkbox checked onCheckedChange={() => handleToggle(s.id)} />
+                <Checkbox checked disabled={readOnly} onCheckedChange={() => !readOnly && handleToggle(s.id)} />
                 <span className="flex-1 text-sm line-through">{s.text}</span>
-                <Button variant="ghost" size="icon" className="size-7" onClick={() => handleDelete(s.id)}>
-                  <Trash2 className="size-3.5" />
-                </Button>
+                {!readOnly && (
+                  <Button variant="ghost" size="icon" className="size-7" onClick={() => handleDelete(s.id)}>
+                    <Trash2 className="size-3.5" />
+                  </Button>
+                )}
               </div>
             ))}
           </div>
         </>
       )}
 
-      <div className="flex flex-col gap-2">
-        <p className="text-xs text-muted-foreground">Incolla più righe (separa con a-capo o ";")</p>
-        <div className="flex gap-2">
-          <Textarea value={bulkText} onChange={(e) => setBulkText(e.target.value)} rows={2} />
-          <Button variant="outline" onClick={handleBulk}>
-            Aggiungi tutti
-          </Button>
+      {!readOnly && (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-muted-foreground">Incolla più righe (separa con a-capo o ";")</p>
+          <div className="flex gap-2">
+            <Textarea value={bulkText} onChange={(e) => setBulkText(e.target.value)} rows={2} />
+            <Button variant="outline" onClick={handleBulk}>
+              Aggiungi tutti
+            </Button>
+          </div>
         </div>
+      )}
+    </div>
+  )
+}
+
+function AddObjectiveDialog({ projectId, onAdded }: { projectId: string; onAdded: () => void }) {
+  const [open, setOpen] = useState(false)
+  const [goal, setGoal] = useState('')
+  const [outcome, setOutcome] = useState('')
+  const [pending, setPending] = useState(false)
+
+  async function handleCreate() {
+    if (!goal.trim()) return
+    setPending(true)
+    try {
+      await api.addObjective(projectId, goal.trim(), outcome.trim())
+      setGoal('')
+      setOutcome('')
+      setOpen(false)
+      onAdded()
+    } catch {
+      toast.error("Non riesco a creare l'obiettivo.")
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button variant="outline" size="sm" />}>
+        <Plus className="size-3.5" /> Aggiungi obiettivo
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Nuovo obiettivo</DialogTitle>
+          <DialogDescription>Verrà messo in coda, dopo gli obiettivi già pianificati per questo progetto.</DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-2">
+          <Input placeholder="Obiettivo (es. Lanciare la demo)…" value={goal} onChange={(e) => setGoal(e.target.value)} />
+          <Input
+            placeholder="Risultato (es. per ottenere il primo utente reale)…"
+            value={outcome}
+            onChange={(e) => setOutcome(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+          />
+        </div>
+        <DialogFooter>
+          <Button disabled={pending || !goal.trim()} onClick={handleCreate}>
+            Crea
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function ObjectiveSection({
+  objective,
+  projectId,
+  onChange,
+  draggable = false,
+  isDragging = false,
+  isDragOver = false,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+}: {
+  objective: ProjectsData['projects'][number]['objectives'][number]
+  projectId: string
+  onChange: () => void
+  draggable?: boolean
+  isDragging?: boolean
+  isDragOver?: boolean
+  onDragStart?: () => void
+  onDragEnd?: () => void
+  onDragOver?: (e: DragEvent) => void
+  onDragLeave?: () => void
+  onDrop?: (e: DragEvent) => void
+}) {
+  const [confirmFinish, setConfirmFinish] = useState(false)
+  const [pending, setPending] = useState(false)
+  const hasOpenStep = objective.steps.some((s) => !s.done)
+  const canFinish = objective.active && !hasOpenStep && objective.steps.length > 0
+
+  async function handleFinish() {
+    setPending(true)
+    try {
+      await api.finishObjective(objective.id)
+      toast.success(`Obiettivo "${objective.goal}" completato.`)
+      onChange()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Errore nel salvataggio.')
+    } finally {
+      setPending(false)
+      setConfirmFinish(false)
+    }
+  }
+
+  return (
+    <div
+      draggable={draggable}
+      onDragStart={draggable ? onDragStart : undefined}
+      onDragEnd={draggable ? onDragEnd : undefined}
+      onDragOver={draggable ? onDragOver : undefined}
+      onDragLeave={draggable ? onDragLeave : undefined}
+      onDrop={draggable ? onDrop : undefined}
+      className={`flex flex-col gap-3 rounded-lg border p-4 ${objective.completed ? 'opacity-60' : ''} ${!objective.active && !objective.completed ? 'opacity-70' : ''} ${
+        draggable && isDragging ? 'opacity-40' : ''
+      } ${draggable && isDragOver ? 'border-t-2 border-t-primary' : ''}`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-sm font-medium">{objective.goal}</p>
+          {objective.outcome && <p className="text-xs text-muted-foreground">{objective.outcome}</p>}
+        </div>
+        {objective.completed ? (
+          <Badge variant="outline">completato</Badge>
+        ) : objective.active ? (
+          <Badge className="bg-primary/10 text-primary">attivo</Badge>
+        ) : (
+          <Badge variant="outline">in coda</Badge>
+        )}
       </div>
+      <ProjectBacklog
+        steps={objective.steps}
+        projectId={projectId}
+        objectiveId={objective.id}
+        readOnly={!objective.active}
+        onChange={onChange}
+      />
+      {canFinish && (
+        <AlertDialog open={confirmFinish} onOpenChange={setConfirmFinish}>
+          <AlertDialogTrigger render={<Button size="sm" variant="outline" className="self-start" />}>
+            Segna obiettivo completato
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Completare "{objective.goal}"?</AlertDialogTitle>
+              <AlertDialogDescription>Il prossimo obiettivo per priorità si sbloccherà.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Non ancora</AlertDialogCancel>
+              <AlertDialogAction disabled={pending} onClick={handleFinish}>
+                Completa
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   )
 }
@@ -270,6 +455,8 @@ export function ProjectsPage() {
   const [data, setData] = useState<ProjectsData | null>(null)
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
+  const [objDragId, setObjDragId] = useState<string | null>(null)
+  const [objDragOverId, setObjDragOverId] = useState<string | null>(null)
 
   function load() {
     api.projects().then(setData).catch(() => toast.error('Non riesco a caricare Progetti.'))
@@ -296,6 +483,26 @@ export function ProjectsPage() {
     order.splice(toIndex, 0, dragId)
     setDragId(null)
     await api.reorderProjects(order)
+    load()
+  }
+
+  async function handleObjectiveDrop(project: ProjectsData['projects'][number], targetId: string) {
+    setObjDragOverId(null)
+    if (!objDragId || objDragId === targetId) {
+      setObjDragId(null)
+      return
+    }
+    const order = project.objectives.map((o) => o.id)
+    const fromIndex = order.indexOf(objDragId)
+    const toIndex = order.indexOf(targetId)
+    if (fromIndex === -1 || toIndex === -1) {
+      setObjDragId(null)
+      return
+    }
+    order.splice(fromIndex, 1)
+    order.splice(toIndex, 0, objDragId)
+    setObjDragId(null)
+    await api.reorderObjectives(project.id, order)
     load()
   }
 
@@ -343,8 +550,41 @@ export function ProjectsPage() {
             ))}
           </TabsList>
           {data.projects.map((p) => (
-            <TabsContent key={p.id} value={p.id}>
-              <ProjectBacklog steps={p.projectSteps} projectId={p.id} onChange={load} />
+            <TabsContent key={p.id} value={p.id} className="flex flex-col gap-4">
+              <div className="flex justify-end">
+                <AddObjectiveDialog projectId={p.id} onAdded={load} />
+              </div>
+              {p.objectives.length === 0 && (
+                <p className="text-sm text-muted-foreground">Nessun obiettivo ancora. Aggiungine uno per iniziare.</p>
+              )}
+              {p.objectives.map((o) => {
+                const queued = !o.active && !o.completed
+                return (
+                  <ObjectiveSection
+                    key={o.id}
+                    objective={o}
+                    projectId={p.id}
+                    onChange={load}
+                    draggable={queued}
+                    isDragging={objDragId === o.id}
+                    isDragOver={objDragOverId === o.id}
+                    onDragStart={() => setObjDragId(o.id)}
+                    onDragEnd={() => {
+                      setObjDragId(null)
+                      setObjDragOverId(null)
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      if (objDragId && objDragId !== o.id) setObjDragOverId(o.id)
+                    }}
+                    onDragLeave={() => setObjDragOverId((cur) => (cur === o.id ? null : cur))}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      handleObjectiveDrop(p, o.id)
+                    }}
+                  />
+                )
+              })}
             </TabsContent>
           ))}
         </Tabs>

@@ -4,601 +4,719 @@
     "projectId": "personal-branding",
     "text": "Interview con Claude Code per definire copy e struttura della sezione Chi sono (15 min)",
     "done": true,
-    "createdAt": "2026-07-06T16:47:47.693Z"
+    "createdAt": "2026-07-06T16:47:47.693Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mr9ge965swzre",
     "projectId": "personal-branding",
     "text": "Costruisci la sezione Chi sono con bio e percorso Service Manager -> CTO (20 min)",
     "done": true,
-    "createdAt": "2026-07-06T16:47:47.693Z"
+    "createdAt": "2026-07-06T16:47:47.693Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mr9ge965z4jko",
     "projectId": "personal-branding",
     "text": "Genera con Claude Code il testo \"About Me\" denso e factual, ottimizzato per essere letto da un'AI (20 min)",
     "done": true,
-    "createdAt": "2026-07-06T16:47:47.693Z"
+    "createdAt": "2026-07-06T16:47:47.693Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mr9ge965zbcjb",
     "projectId": "personal-branding",
     "text": "Scrivi il preloaded prompt da usare nel blocco ask-AI-about-me (chi sei, cosa fai, contesto) (15 min)",
     "done": true,
-    "createdAt": "2026-07-06T16:47:47.693Z"
+    "createdAt": "2026-07-06T16:47:47.693Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mr9ge965kqfhl",
     "projectId": "personal-branding",
     "text": "Fai costruire a Claude Code il blocco footer \"Chiedi all'AI chi sono\" con link precompilati a ChatGPT/Claude/Gemini (20 min)",
     "done": true,
-    "createdAt": "2026-07-06T16:47:47.693Z"
+    "createdAt": "2026-07-06T16:47:47.693Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mr9ge965tb7wu",
     "projectId": "personal-branding",
     "text": "Testa nel browser l'iscrizione newsletter end-to-end (10 min)",
     "done": true,
-    "createdAt": "2026-07-06T16:47:47.693Z"
+    "createdAt": "2026-07-06T16:47:47.693Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mr9ge965mq3wl",
     "projectId": "personal-branding",
     "text": "Testa nel browser ogni link del blocco ask-AI-about-me (click, verifica che il prompt si carichi) (10 min)",
     "done": true,
-    "createdAt": "2026-07-06T16:47:47.693Z"
+    "createdAt": "2026-07-06T16:47:47.693Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mr9ge9659fmwa",
     "projectId": "personal-branding",
     "text": "Verifica il sito online sul dominio reale: Chi sono, Contatto, Newsletter, ask-AI-about-me (15 min)",
     "done": true,
-    "createdAt": "2026-07-06T16:47:47.693Z"
+    "createdAt": "2026-07-06T16:47:47.693Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwf9699",
     "projectId": "personal-branding",
     "text": "Articolo blog - 09/07/2026",
     "done": true,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwt0mc0",
     "projectId": "personal-branding",
     "text": "Articolo blog - 10/07/2026 - come si fnno i preventivi nell'era dell'AI?",
     "done": true,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwjhj9o",
     "projectId": "personal-branding",
     "text": "Articolo blog - 21/07/2026 - Ho chiesto alla mia Board of Advisors AI di progettare il mio focus",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwtasmc",
     "projectId": "personal-branding",
     "text": "Articolo blog - 22/07/2026 - Ho quasi abbandonato il mio progetto il giorno stesso in cui l'ho iniziato",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwsxcet",
     "projectId": "personal-branding",
     "text": "Articolo blog - 23/07/2026 - La decisione di design più importante di Vector: l'algoritmo non decide le priorità, io sì",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnw6u7xq",
     "projectId": "personal-branding",
     "text": "Articolo blog - 24/07/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwn03nt",
     "projectId": "personal-branding",
     "text": "Articolo blog - 27/07/2026 - Ho reso il mio focus visibile come le contribution di GitHub",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwpvutr",
     "projectId": "personal-branding",
     "text": "Articolo blog - 28/07/2026 - Ho aggiunto un'opzione che mi obbliga a fare le cose in ordine",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnw4kbx9",
     "projectId": "personal-branding",
     "text": "Articolo blog - 29/07/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwxznrj",
     "projectId": "personal-branding",
     "text": "Articolo blog - 30/07/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwfv485",
     "projectId": "personal-branding",
     "text": "Articolo blog - 31/07/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwd0pzb",
     "projectId": "personal-branding",
     "text": "Articolo blog - 03/08/2026 - Il bug che faceva sparire i miei progetti finiti",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwgdnq6",
     "projectId": "personal-branding",
     "text": "Articolo blog - 04/08/2026 - Ho migrato tutto il frontend e nel farlo ho quasi perso dati reali",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwwigfu",
     "projectId": "personal-branding",
     "text": "Articolo blog - 05/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwg4xuy",
     "projectId": "personal-branding",
     "text": "Articolo blog - 06/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnw4wlov",
     "projectId": "personal-branding",
     "text": "Articolo blog - 07/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwgjld0",
     "projectId": "personal-branding",
     "text": "Articolo blog - 10/08/2026 - Il mio tool mi impedisce di lavorare troppo sulle cose divertenti",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwgw9py",
     "projectId": "personal-branding",
     "text": "Articolo blog - 11/08/2026 - Ho costruito il mio \"internal operating system\" prima di sapere che era un framework noto",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnw8286o",
     "projectId": "personal-branding",
     "text": "Articolo blog - 12/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnw8o1lt",
     "projectId": "personal-branding",
     "text": "Articolo blog - 13/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwjrn8j",
     "projectId": "personal-branding",
     "text": "Articolo blog - 14/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnw7240j",
     "projectId": "personal-branding",
     "text": "Articolo blog - 17/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwk3w3r",
     "projectId": "personal-branding",
     "text": "Articolo blog - 18/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwycavl",
     "projectId": "personal-branding",
     "text": "Articolo blog - 19/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwal1ef",
     "projectId": "personal-branding",
     "text": "Articolo blog - 20/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnw870m0",
     "projectId": "personal-branding",
     "text": "Articolo blog - 21/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwqu4ze",
     "projectId": "personal-branding",
     "text": "Articolo blog - 24/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnw3587t",
     "projectId": "personal-branding",
     "text": "Articolo blog - 25/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnw6m9ls",
     "projectId": "personal-branding",
     "text": "Articolo blog - 26/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwl2loe",
     "projectId": "personal-branding",
     "text": "Articolo blog - 27/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnwhm796",
     "projectId": "personal-branding",
     "text": "Articolo blog - 28/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnw378wg",
     "projectId": "personal-branding",
     "text": "Articolo blog - 31/08/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrcafpnw4rzqv",
     "projectId": "personal-branding",
     "text": "Articolo blog - 01/09/2026",
     "done": false,
-    "createdAt": "2026-07-08T16:24:16.556Z"
+    "createdAt": "2026-07-08T16:24:16.556Z",
+    "objectiveId": "mrvui72jem2fa"
   },
   {
     "id": "mrg6lczntkvoi",
     "projectId": "mrg69npj7p0l9",
     "text": "Capire come AI può aiutare nella pubblicazione,revisione degli articoli",
     "done": true,
-    "createdAt": "2026-07-11T09:47:46.307Z"
+    "createdAt": "2026-07-11T09:47:46.307Z",
+    "objectiveId": "mrvui72kjj5dh"
   },
   {
     "id": "mrg6kzbkwilad",
     "projectId": "mrg69npj7p0l9",
     "text": "Review articolo - Come trascrivere un audio gratis con Whisper usando Kaggle",
     "done": true,
-    "createdAt": "2026-07-11T09:47:28.592Z"
+    "createdAt": "2026-07-11T09:47:28.592Z",
+    "objectiveId": "mrvui72kjj5dh"
   },
   {
     "id": "mrsvx0vhi9qu1",
     "projectId": "vector",
     "text": "Aggiunta obiettivi e task ai progetti con formulazione \"Obiettivo x Risultato\"",
     "done": false,
-    "createdAt": "2026-07-20T07:09:54.989Z"
+    "createdAt": "2026-07-20T07:09:54.989Z",
+    "objectiveId": "mrvui72k347v1"
   },
   {
     "id": "mrc90qmk94u26",
     "projectId": "vector",
     "text": "Logica gamification e activity points",
     "done": false,
-    "createdAt": "2026-07-08T15:44:38.348Z"
+    "createdAt": "2026-07-08T15:44:38.348Z",
+    "objectiveId": "mrvui72k347v1"
   },
   {
     "id": "mrc90ead8lrmn",
     "projectId": "vector",
     "text": "Aggiunta grafico lineare per tracciae Activity points",
     "done": false,
-    "createdAt": "2026-07-08T15:44:22.357Z"
+    "createdAt": "2026-07-08T15:44:22.357Z",
+    "objectiveId": "mrvui72k347v1"
   },
   {
     "id": "mrcaiezjv9cds",
     "projectId": "vector",
     "text": "Cosa abbiamo imparato oggi",
     "done": false,
-    "createdAt": "2026-07-08T16:26:22.687Z"
+    "createdAt": "2026-07-08T16:26:22.687Z",
+    "objectiveId": "mrvui72k347v1"
   },
   {
     "id": "mrg6c0jlo013d",
     "projectId": "vector",
     "text": "Gestione e riodino progetti",
     "done": true,
-    "createdAt": "2026-07-11T09:40:30.273Z"
+    "createdAt": "2026-07-11T09:40:30.273Z",
+    "objectiveId": "mrvui72k347v1"
   },
   {
     "id": "mrdopl5ecwub2",
     "projectId": "vector",
     "text": "fix: il titolo e la favicon nella scheda del browser vanno aggiornati con icona e titolo Vector",
     "done": true,
-    "createdAt": "2026-07-09T15:51:38.066Z"
+    "createdAt": "2026-07-09T15:51:38.066Z",
+    "objectiveId": "mrvui72k347v1"
   },
   {
     "id": "mrdpfuhpnn4k7",
     "projectId": "vector",
     "text": "fix: non compaiono più i toast \"Task Completato !! Bravissimo 1 +10pt!!!\" quando si preme su \"Segna Fatto\" in home.",
     "done": true,
-    "createdAt": "2026-07-09T16:12:03.229Z"
+    "createdAt": "2026-07-09T16:12:03.229Z",
+    "objectiveId": "mrvui72k347v1"
   },
   {
     "id": "mrdok9zoipjfp",
     "projectId": "vector",
     "text": "Fix ordinamento task progetti - perso dragndrop",
     "done": true,
-    "createdAt": "2026-07-09T15:47:30.324Z"
+    "createdAt": "2026-07-09T15:47:30.324Z",
+    "objectiveId": "mrvui72k347v1"
   },
   {
     "id": "mrdoka23zjprt",
     "projectId": "vector",
     "text": "Fix - i task in Vector non sono più modificabili",
     "done": true,
-    "createdAt": "2026-07-09T15:47:30.411Z"
+    "createdAt": "2026-07-09T15:47:30.411Z",
+    "objectiveId": "mrvui72k347v1"
   },
   {
     "id": "mrc8x58ibw9i8",
     "projectId": "vector",
     "text": "Refactoring interfaccia",
     "done": true,
-    "createdAt": "2026-07-08T15:41:50.658Z"
-  },
-  {
-    "id": "mrt6srop368vx",
-    "projectId": "mvp-stories",
-    "text": "Corso Subagents - Anthropic",
-    "done": false,
-    "createdAt": "2026-07-20T12:14:32.234Z"
-  },
-  {
-    "id": "mrt28gs7d2ttu",
-    "projectId": "mvp-stories",
-    "text": "Studio Materiale di Giada Workshop 1",
-    "done": false,
-    "createdAt": "2026-07-20T10:06:46.519Z"
-  },
-  {
-    "id": "mrsvspa6juxzx",
-    "projectId": "mvp-stories",
-    "text": "Analisi Workshop 2 boosha",
-    "done": false,
-    "createdAt": "2026-07-20T07:06:33.342Z"
-  },
-  {
-    "id": "mrg5yza725dsm",
-    "projectId": "mvp-stories",
-    "text": "08-03 (frontend consent gate)",
-    "done": false,
-    "createdAt": "2026-07-11T09:30:22.111Z"
-  },
-  {
-    "id": "mrsvs75zuepoo",
-    "projectId": "mvp-stories",
-    "text": "Analisi Workshop 1 Boosha",
-    "done": true,
-    "createdAt": "2026-07-20T07:06:09.863Z"
-  },
-  {
-    "id": "mrffid7igjtqz",
-    "projectId": "mvp-stories",
-    "text": "08-famiglia-entita-reale - Sostituisce la costante FAMILY_ID",
-    "done": true,
-    "createdAt": "2026-07-10T21:09:36.990Z"
-  },
-  {
-    "id": "mr9gvkzhbe4y7",
-    "projectId": "mvp-stories",
-    "text": "Creare specifica MVP (20min)",
-    "done": true,
-    "createdAt": "2026-07-06T17:01:16.157Z"
-  },
-  {
-    "id": "mrc56kl3j7bry",
-    "projectId": "mvp-stories",
-    "text": "Fork & setup Hermes Agent",
-    "done": true,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
-    "id": "mrc56kl3z8ngz",
-    "projectId": "mvp-stories",
-    "text": "Login anziano",
-    "done": true,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
-    "id": "mrc56kl3alt2q",
-    "projectId": "mvp-stories",
-    "text": "Partizionamento memoria per account",
-    "done": true,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
-    "id": "mrc56kl317hmi",
-    "projectId": "mvp-stories",
-    "text": "Pipeline vocale (STT + TTS)",
-    "done": true,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
-    "id": "mrc56kl33nyur",
-    "projectId": "mvp-stories",
-    "text": "Elaborazione messaggi via LLM (OpenRouter/Groq)",
-    "done": true,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
-    "id": "mrc56kl3h7wke",
-    "projectId": "mvp-stories",
-    "text": "UI web minimale per la conversazione",
-    "done": true,
-    "createdAt": "2026-07-08T13:57:11.991Z"
-  },
-  {
-    "id": "mrf0emp9dlx9j",
-    "projectId": "mvp-stories",
-    "text": "Hardening Demo - Voce,modello llm, guardrails, ecc",
-    "done": true,
-    "createdAt": "2026-07-10T14:06:48.429Z"
+    "createdAt": "2026-07-08T15:41:50.658Z",
+    "objectiveId": "mrvui72k347v1"
   },
   {
     "id": "mrt9cb2chob68",
     "projectId": "studio-ai-agentica",
-    "text": "Corso Anthropic - Claude Cowork",
+    "text": "Corso Anthropic - AI Fluency Framework",
     "done": false,
-    "createdAt": "2026-07-20T13:25:43.044Z"
+    "createdAt": "2026-07-20T13:25:43.044Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrf38lpda123x",
     "projectId": "studio-ai-agentica",
     "text": "2-5. Scrivi la funzione Python e trasformala in tool con il decoratore @tool, includendo docstring chiara, nomi parametri autoesplicativi e type annotation",
     "done": false,
-    "createdAt": "2026-07-10T15:26:06.049Z"
+    "createdAt": "2026-07-10T15:26:06.049Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrf38lpdph3vj",
     "projectId": "studio-ai-agentica",
     "text": "2-6. Ispeziona lo schema del tool stampando name, description e args per vedere cosa \"vede\" il modello",
     "done": false,
-    "createdAt": "2026-07-10T15:26:06.049Z"
+    "createdAt": "2026-07-10T15:26:06.049Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrf38lpd74uu7",
     "projectId": "studio-ai-agentica",
     "text": "2-7. Collega il tool al modello con ChatGroq e bind_tools",
     "done": false,
-    "createdAt": "2026-07-10T15:26:06.049Z"
+    "createdAt": "2026-07-10T15:26:06.049Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrf38lpdcm1x2",
     "projectId": "studio-ai-agentica",
     "text": "2-8. Testa che il modello scelga di chiamare il tool invocando llm_with_tools.invoke() e leggendo tool_calls",
     "done": false,
-    "createdAt": "2026-07-10T15:26:06.049Z"
+    "createdAt": "2026-07-10T15:26:06.049Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrf38lpdcg57p",
     "projectId": "studio-ai-agentica",
     "text": "2-9. Esegui il tool con i parametri generati dal modello chiamando get_weather.invoke(args)",
     "done": false,
-    "createdAt": "2026-07-10T15:26:06.049Z"
+    "createdAt": "2026-07-10T15:26:06.049Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrd75h4hqc1rs",
     "projectId": "studio-ai-agentica",
     "text": "3. (20 min) Fai una singola chiamata \"tool calling\" senza agent executor. Passa il tool sopra a un modello con tool-calling nativo (OpenAI/Anthropic) e guarda l'output grezzo: il modello decide quale tool chiamare e con che argomenti, ma non lo esegue lui. Eseguilo tu a mano, una volta, manualmente. Questo ti fa capire la distinzione fondamentale tra \"agent\" (il ragionamento) e \"agent executor\" (il loop che esegue).",
     "done": false,
-    "createdAt": "2026-07-09T07:40:06.257Z"
+    "createdAt": "2026-07-09T07:40:06.257Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrd75h4hz9hiz",
     "projectId": "studio-ai-agentica",
     "text": "4. (15 min) Leggi (non implementare ancora) il ciclo ReAct. Prendi 15 minuti per capire il pattern Thought → Action → Action Input → Observation, ripetuto. Non serve costruirlo — basta che tu lo riconosca quando lo vedi in LangChain/LangGraph dopo.",
     "done": false,
-    "createdAt": "2026-07-09T07:40:06.257Z"
+    "createdAt": "2026-07-09T07:40:06.257Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrd75h4h9ftwc",
     "projectId": "studio-ai-agentica",
     "text": "5. (20 min) Prova create_tool_calling_agent di LangChain (o l'equivalente astratto). Solo per vedere il loop completo funzionare \"a scatola chiusa\" con il tool che hai scritto al punto 2. Non capire l'interno ancora — l'obiettivo è \"vedere qualcosa che funziona\" prima di smontarlo.",
     "done": false,
-    "createdAt": "2026-07-09T07:40:06.257Z"
+    "createdAt": "2026-07-09T07:40:06.257Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrf38lpdumnzs",
     "projectId": "studio-ai-agentica",
     "text": "2-1. Installa le dipendenze con pip install jupyter langchain langchain-groq",
     "done": true,
-    "createdAt": "2026-07-10T15:26:06.049Z"
+    "createdAt": "2026-07-10T15:26:06.049Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrf38lpd7n9g9",
     "projectId": "studio-ai-agentica",
     "text": "2-2. Ottieni una API key gratuita su console.groq.com/keys",
     "done": true,
-    "createdAt": "2026-07-10T15:26:06.049Z"
+    "createdAt": "2026-07-10T15:26:06.049Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrf38lpdw0n01",
     "projectId": "studio-ai-agentica",
     "text": "2-3. Avvia Jupyter Notebook con jupyter notebook",
     "done": true,
-    "createdAt": "2026-07-10T15:26:06.049Z"
+    "createdAt": "2026-07-10T15:26:06.049Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mrf38lpd3nmkd",
     "projectId": "studio-ai-agentica",
     "text": "2-4. Salva la API key come variabile d'ambiente con os.environ[\"GROQ_API_KEY\"]",
     "done": true,
-    "createdAt": "2026-07-10T15:26:06.049Z"
+    "createdAt": "2026-07-10T15:26:06.049Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mr9gwn6py85iz",
     "projectId": "studio-ai-agentica",
     "text": "Definire primo progetto agentico (10min)",
     "done": true,
-    "createdAt": "2026-07-06T17:02:05.665Z"
+    "createdAt": "2026-07-06T17:02:05.665Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mr9gwrqdlkj2j",
     "projectId": "studio-ai-agentica",
     "text": "Pianificare gli step (10min)",
     "done": true,
-    "createdAt": "2026-07-06T17:02:11.557Z"
+    "createdAt": "2026-07-06T17:02:11.557Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mr7ct9068aw5",
     "projectId": "studio-ai-agentica",
     "text": "1a. (5 min) Apri un file/notebook Python o la chat web di un LLM — decidi dove farai il test.",
     "done": true,
-    "createdAt": "2026-07-09T08:36:55.278Z"
+    "createdAt": "2026-07-09T08:36:55.278Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mryc5oge6ksl",
     "projectId": "studio-ai-agentica",
     "text": "1b. (5 min) Chiedi al modello \"quanto fa 4.1 moltiplicato per 7.9?\", scrivi la sua risposta e confrontala col risultato vero (32.39).",
     "done": true,
-    "createdAt": "2026-07-09T08:36:55.278Z"
+    "createdAt": "2026-07-09T08:36:55.278Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mry5tcw8vyp1",
     "projectId": "studio-ai-agentica",
     "text": "1c. (5 min) Chiedi al modello qualcosa su un evento/prodotto uscito dopo il suo training cutoff, osserva se inventa una risposta plausibile ma falsa.",
     "done": true,
-    "createdAt": "2026-07-09T08:36:55.278Z"
+    "createdAt": "2026-07-09T08:36:55.278Z",
+    "objectiveId": "mrvui72kspwzd"
   },
   {
     "id": "mraotfr9kr87",
     "projectId": "studio-ai-agentica",
     "text": "1d. (5 min) Annota cosa hai osservato: come ha sbagliato, con quanta sicurezza, e perché questo giustifica servire agenti/RAG.",
     "done": true,
-    "createdAt": "2026-07-09T08:36:55.278Z"
+    "createdAt": "2026-07-09T08:36:55.278Z",
+    "objectiveId": "mrvui72kspwzd"
+  },
+  {
+    "id": "mrvsbbkppysgy",
+    "projectId": "mrvsapak1gq74",
+    "text": "Review Meeting Leonardo requisiti di progetto",
+    "done": false,
+    "createdAt": "2026-07-22T07:52:22.105Z",
+    "objectiveId": "mrvui72kdb65i"
+  },
+  {
+    "id": "mrvscgugo3vjc",
+    "projectId": "studio-ai-agentica",
+    "text": "Corso Subagents - Anthropic",
+    "done": false,
+    "createdAt": "2026-07-22T07:53:15.592Z",
+    "objectiveId": "mrvui72kspwzd"
+  },
+  {
+    "id": "mrvsdfd5w21lc",
+    "projectId": "mrvsapak1gq74",
+    "text": "Preparazione Workshop per Cliente",
+    "done": false,
+    "createdAt": "2026-07-22T07:54:00.329Z",
+    "objectiveId": "mrvui72kdb65i"
+  },
+  {
+    "id": "mrg5yza725dsm",
+    "projectId": "mvp-stories",
+    "text": "08-03 (frontend consent gate)",
+    "done": false,
+    "createdAt": "2026-07-11T09:30:22.111Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrt28gs7d2ttu",
+    "projectId": "mvp-stories",
+    "text": "Studio Materiale di Giada Workshop 1",
+    "done": false,
+    "createdAt": "2026-07-20T10:06:46.519Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrsvspa6juxzx",
+    "projectId": "mvp-stories",
+    "text": "Analisi Workshop 2 boosha",
+    "done": false,
+    "createdAt": "2026-07-20T07:06:33.342Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrvse5pwj9fa1",
+    "projectId": "mvp-stories",
+    "text": "Integrazione Dograh",
+    "done": false,
+    "createdAt": "2026-07-22T07:54:34.484Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrvse9nf1j1va",
+    "projectId": "mvp-stories",
+    "text": "Disegno Architettura",
+    "done": false,
+    "createdAt": "2026-07-22T07:54:39.580Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrsvs75zuepoo",
+    "projectId": "mvp-stories",
+    "text": "Analisi Workshop 1 Boosha",
+    "done": true,
+    "createdAt": "2026-07-20T07:06:09.863Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrffid7igjtqz",
+    "projectId": "mvp-stories",
+    "text": "08-famiglia-entita-reale - Sostituisce la costante FAMILY_ID",
+    "done": true,
+    "createdAt": "2026-07-10T21:09:36.990Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mr9gvkzhbe4y7",
+    "projectId": "mvp-stories",
+    "text": "Creare specifica MVP (20min)",
+    "done": true,
+    "createdAt": "2026-07-06T17:01:16.157Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrc56kl3j7bry",
+    "projectId": "mvp-stories",
+    "text": "Fork & setup Hermes Agent",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrc56kl3z8ngz",
+    "projectId": "mvp-stories",
+    "text": "Login anziano",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrc56kl3alt2q",
+    "projectId": "mvp-stories",
+    "text": "Partizionamento memoria per account",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrc56kl317hmi",
+    "projectId": "mvp-stories",
+    "text": "Pipeline vocale (STT + TTS)",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrc56kl33nyur",
+    "projectId": "mvp-stories",
+    "text": "Elaborazione messaggi via LLM (OpenRouter/Groq)",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrc56kl3h7wke",
+    "projectId": "mvp-stories",
+    "text": "UI web minimale per la conversazione",
+    "done": true,
+    "createdAt": "2026-07-08T13:57:11.991Z",
+    "objectiveId": "mrvui72k3e3od"
+  },
+  {
+    "id": "mrf0emp9dlx9j",
+    "projectId": "mvp-stories",
+    "text": "Hardening Demo - Voce,modello llm, guardrails, ecc",
+    "done": true,
+    "createdAt": "2026-07-10T14:06:48.429Z",
+    "objectiveId": "mrvui72k3e3od"
   }
 ]

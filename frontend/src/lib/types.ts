@@ -31,6 +31,11 @@ export interface ActionProject extends Project {
   hasBacklog: boolean
   nextStepId: string | null
   nextStepText: string | null
+  activeObjectiveId: string | null
+  activeObjectiveGoal: string | null
+  activeObjectiveOutcome: string | null
+  objectiveComplete: boolean
+  allObjectivesDone: boolean
   priorityRank: number
   dailyTaskLimit: number
   completedTodayCount: number
@@ -52,13 +57,30 @@ export interface HomeData {
 export interface Step {
   id: string
   projectId: string
+  objectiveId: string
   text: string
   done: boolean
   createdAt: string
 }
 
+export interface Objective {
+  id: string
+  projectId: string
+  goal: string
+  outcome: string
+  priority: number
+  completed: boolean
+  completedAt: string | null
+  createdAt: string
+}
+
+export interface ObjectiveWithSteps extends Objective {
+  active: boolean
+  steps: Step[]
+}
+
 export interface ProjectWithSteps extends Project {
-  projectSteps: Step[]
+  objectives: ObjectiveWithSteps[]
 }
 
 export interface ProjectsData {

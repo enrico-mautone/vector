@@ -1,4 +1,4 @@
-import type { HabitsData, HomeData, Project, ProjectsData, SettingsData } from './types'
+import type { HabitsData, HomeData, Objective, Project, ProjectsData, SettingsData } from './types'
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -30,15 +30,15 @@ export const api = {
       body: JSON.stringify({ habitId }),
     }),
 
-  addStep: (projectId: string, text: string) =>
+  addStep: (projectId: string, objectiveId: string, text: string) =>
     request<{ ok: true }>('/api/steps/add', {
       method: 'POST',
-      body: JSON.stringify({ projectId, text }),
+      body: JSON.stringify({ projectId, objectiveId, text }),
     }),
-  bulkAddSteps: (projectId: string, bulkText: string) =>
+  bulkAddSteps: (projectId: string, objectiveId: string, bulkText: string) =>
     request<{ ok: true }>('/api/steps/bulk', {
       method: 'POST',
-      body: JSON.stringify({ projectId, bulkText }),
+      body: JSON.stringify({ projectId, objectiveId, bulkText }),
     }),
   reorderSteps: (projectId: string, order: string[]) =>
     request<{ ok: true }>('/api/steps/reorder', {
@@ -64,6 +64,28 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ order }),
     }),
+
+  objectives: (projectId: string) =>
+    request<{ objectives: import('./types').ObjectiveWithSteps[] }>(`/api/objectives?projectId=${projectId}`),
+  addObjective: (projectId: string, goal: string, outcome: string) =>
+    request<{ ok: true; objective: Objective }>('/api/objectives/add', {
+      method: 'POST',
+      body: JSON.stringify({ projectId, goal, outcome }),
+    }),
+  reorderObjectives: (projectId: string, order: string[]) =>
+    request<{ ok: true }>('/api/objectives/reorder', {
+      method: 'POST',
+      body: JSON.stringify({ projectId, order }),
+    }),
+  editObjective: (id: string, goal: string, outcome: string) =>
+    request<{ ok: true; objective: Objective }>(`/api/objectives/${id}/edit`, {
+      method: 'POST',
+      body: JSON.stringify({ goal, outcome }),
+    }),
+  finishObjective: (id: string) =>
+    request<{ ok: true }>(`/api/objectives/${id}/finish`, { method: 'POST' }),
+  deleteObjective: (id: string) =>
+    request<{ ok: true }>(`/api/objectives/${id}/delete`, { method: 'POST' }),
 
   habits: (params: Record<string, string>) =>
     request<HabitsData>(`/api/habits?${new URLSearchParams(params).toString()}`),

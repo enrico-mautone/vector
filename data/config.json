@@ -11,32 +11,37 @@
     {
       "id": "studio-ai-agentica",
       "name": "Studio AI Agentica",
-      "priority": 4
+      "priority": 5
     },
     {
       "id": "personal-branding",
       "name": "Personal Branding",
-      "priority": 3
+      "priority": 4
     },
     {
       "id": "shoebox",
       "name": "ShoeBox",
-      "priority": 7
+      "priority": 8
     },
     {
       "id": "vector",
       "name": "Vector",
-      "priority": 2
+      "priority": 3
     },
     {
       "id": "mrg69npj7p0l9",
       "name": "PurpleSwan",
-      "priority": 5
+      "priority": 6
     },
     {
       "id": "mrg7borkk3teu",
       "name": "Altro",
-      "priority": 6
+      "priority": 7
+    },
+    {
+      "id": "mrvsapak1gq74",
+      "name": "Gestionale Studio DeSimone",
+      "priority": 2
     }
   ],
   "habits": [

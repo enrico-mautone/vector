@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 const CONFIG_PATH = path.join(__dirname, '..', 'data', 'config.json');
 const LOG_PATH = path.join(__dirname, '..', 'data', 'log.json');
 const STEPS_PATH = path.join(__dirname, '..', 'data', 'steps.json');
+const OBJECTIVES_PATH = path.join(__dirname, '..', 'data', 'objectives.json');
 const FRONTEND_DIST = path.join(__dirname, '..', 'frontend', 'dist');
 
 app.use(express.json());
@@ -185,6 +186,16 @@ function activeProjectsByPriority(config, steps) {
     .sort((a, b) => a.priority - b.priority);
 }
 
+// Obiettivi non completati di un progetto, ordinati per priorità crescente
+// (1 = prossimo da lavorare). Il primo elemento è l'obiettivo "attivo":
+// solo i suoi task sono lavorabili — gate strutturale, sempre attivo,
+// indipendente dal toggle "Lo devi fare!!!!" (quello vale solo tra progetti).
+function activeObjectivesByPriority(objectives, projectId) {
+  return objectives
+    .filter((o) => o.projectId === projectId && !o.completed)
+    .sort((a, b) => a.priority - b.priority);
+}
+
 // Con "Lo devi fare!!!!" attivo: non si può registrare uno step su un
 // progetto se un progetto a priorità maggiore (numero più basso) non ha
 // ancora nessuno step registrato oggi. Guarda solo i progetti con priorità
@@ -281,6 +292,7 @@ function buildHomeData(quote) {
   const config = readJSON(CONFIG_PATH);
   const log = readJSON(LOG_PATH);
   const steps = readJSON(STEPS_PATH);
+  const objectives = readJSON(OBJECTIVES_PATH);
   const today = todayStr();
   const todayEntry = getEntry(log, today) || { projects: {}, habits: {} };
 
@@ -303,7 +315,13 @@ function buildHomeData(quote) {
       const daysSince = last ? daysBetween(last, today) : null;
       const urgent = !doneToday && (daysSince === null || daysSince >= config.urgencyThresholdDays);
       const hasBacklog = steps.some((s) => s.projectId === p.id);
-      const nextStep = steps.find((s) => s.projectId === p.id && !s.done);
+      const projectObjectives = objectives.filter((o) => o.projectId === p.id);
+      const activeObjs = activeObjectivesByPriority(objectives, p.id);
+      const activeObjective = activeObjs[0];
+      const objectiveSteps = activeObjective ? steps.filter((s) => s.objectiveId === activeObjective.id) : [];
+      const nextStep = activeObjective ? objectiveSteps.find((s) => !s.done) : null;
+      const objectiveComplete = !!(activeObjective && objectiveSteps.length > 0 && !nextStep);
+      const allObjectivesDone = projectObjectives.length > 0 && activeObjs.length === 0;
       const workable = priorAllDone;
       priorAllDone = priorAllDone && (doneToday || !hasBacklog);
       return {
@@ -315,6 +333,11 @@ function buildHomeData(quote) {
         hasBacklog,
         nextStepId: nextStep ? nextStep.id : null,
         nextStepText: nextStep ? nextStep.text : null,
+        activeObjectiveId: activeObjective ? activeObjective.id : null,
+        activeObjectiveGoal: activeObjective ? activeObjective.goal : null,
+        activeObjectiveOutcome: activeObjective ? activeObjective.outcome : null,
+        objectiveComplete,
+        allObjectivesDone,
         priorityRank: rank,
         dailyTaskLimit: dailyTaskLimitForRank(rank),
         completedTodayCount,
@@ -362,6 +385,12 @@ app.post('/api/home/complete-step', (req, res) => {
     loggedStepsByProject[p.id] = stepsLoggedToday(todayEntry, p.id).map((s) => ({ stepId: s.stepId }));
   });
   loggedStepsByProject[projectId] = loggedStepsByProject[projectId].concat([{ stepId }]);
+
+  const objectives = readJSON(OBJECTIVES_PATH);
+  const activeObjective = activeObjectivesByPriority(objectives, projectId)[0];
+  if (!activeObjective || step.objectiveId !== activeObjective.id) {
+    return res.status(400).json({ ok: false, error: 'Questo task appartiene a un obiettivo non ancora attivo.' });
+  }
 
   if (config.enforcePriorityOrder) {
     const violation = checkPriorityGate(config, loggedStepsByProject, steps, projectId);
@@ -454,27 +483,33 @@ app.post('/api/home/toggle-habit', (req, res) => {
 });
 
 app.post('/api/steps/add', (req, res) => {
-  const { projectId, text } = req.body;
+  const { projectId, objectiveId, text } = req.body;
+  if (!objectiveId) {
+    return res.status(400).json({ ok: false, error: 'Obiettivo mancante.' });
+  }
   const steps = readJSON(STEPS_PATH);
   if (text && text.trim()) {
-    steps.push({ id: generateId(), projectId, text: text.trim(), done: false, createdAt: new Date().toISOString() });
+    steps.push({ id: generateId(), projectId, objectiveId, text: text.trim(), done: false, createdAt: new Date().toISOString() });
     writeJSON(STEPS_PATH, steps);
   }
-  res.json({ ok: true, steps: steps.filter((s) => s.projectId === projectId) });
+  res.json({ ok: true, steps: steps.filter((s) => s.objectiveId === objectiveId) });
 });
 
 app.post('/api/steps/bulk', (req, res) => {
-  const { projectId, bulkText } = req.body;
+  const { projectId, objectiveId, bulkText } = req.body;
+  if (!objectiveId) {
+    return res.status(400).json({ ok: false, error: 'Obiettivo mancante.' });
+  }
   const steps = readJSON(STEPS_PATH);
   const newTexts = parseBulkSteps(bulkText || '');
   if (newTexts.length > 0) {
     const createdAt = new Date().toISOString();
     newTexts.forEach((text) => {
-      steps.push({ id: generateId(), projectId, text, done: false, createdAt });
+      steps.push({ id: generateId(), projectId, objectiveId, text, done: false, createdAt });
     });
     writeJSON(STEPS_PATH, steps);
   }
-  res.json({ ok: true, steps: steps.filter((s) => s.projectId === projectId) });
+  res.json({ ok: true, steps: steps.filter((s) => s.objectiveId === objectiveId) });
 });
 
 // Riordina gli step di un progetto secondo l'ordine (array di id) ricevuto
@@ -576,14 +611,23 @@ app.get('/api/habits', (req, res) => {
 app.get('/api/projects', (req, res) => {
   const config = readJSON(CONFIG_PATH);
   const steps = readJSON(STEPS_PATH);
+  const objectives = readJSON(OBJECTIVES_PATH);
   const projects = config.projects
     .slice()
     .sort((a, b) => a.priority - b.priority)
     .map((p) => {
-      const projectSteps = steps
-        .filter((s) => s.projectId === p.id)
-        .sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
-      return { ...p, projectSteps };
+      const active = activeObjectivesByPriority(objectives, p.id)[0] || null;
+      const projectObjectives = objectives
+        .filter((o) => o.projectId === p.id)
+        .sort((a, b) => a.priority - b.priority)
+        .map((o) => ({
+          ...o,
+          active: !o.completed && active !== null && o.id === active.id,
+          steps: steps
+            .filter((s) => s.objectiveId === o.id)
+            .sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1)),
+        }));
+      return { ...p, objectives: projectObjectives };
     });
   res.json({ projects });
 });
@@ -614,6 +658,114 @@ app.post('/api/projects/reorder', (req, res) => {
   });
   writeJSON(CONFIG_PATH, config);
   res.json({ ok: true, config });
+});
+
+app.get('/api/objectives', (req, res) => {
+  const { projectId } = req.query;
+  const objectives = readJSON(OBJECTIVES_PATH);
+  const steps = readJSON(STEPS_PATH);
+  const active = activeObjectivesByPriority(objectives, projectId)[0] || null;
+  const list = objectives
+    .filter((o) => o.projectId === projectId)
+    .sort((a, b) => a.priority - b.priority)
+    .map((o) => ({
+      ...o,
+      active: !o.completed && active !== null && o.id === active.id,
+      steps: steps
+        .filter((s) => s.objectiveId === o.id)
+        .sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1)),
+    }));
+  res.json({ objectives: list });
+});
+
+app.post('/api/objectives/add', (req, res) => {
+  const { projectId, goal, outcome } = req.body;
+  if (!projectId || !goal || !goal.trim()) {
+    return res.status(400).json({ ok: false, error: 'Obiettivo mancante.' });
+  }
+  const objectives = readJSON(OBJECTIVES_PATH);
+  const maxPriority = objectives
+    .filter((o) => o.projectId === projectId)
+    .reduce((max, o) => Math.max(max, o.priority), 0);
+  const objective = {
+    id: generateId(),
+    projectId,
+    goal: goal.trim(),
+    outcome: (outcome || '').trim(),
+    priority: maxPriority + 1,
+    completed: false,
+    completedAt: null,
+    createdAt: new Date().toISOString(),
+  };
+  objectives.push(objective);
+  writeJSON(OBJECTIVES_PATH, objectives);
+  res.json({ ok: true, objective });
+});
+
+app.post('/api/objectives/reorder', (req, res) => {
+  const { projectId, order } = req.body;
+  if (!projectId || !Array.isArray(order)) {
+    return res.status(400).json({ ok: false, error: 'Ordine non valido.' });
+  }
+  const objectives = readJSON(OBJECTIVES_PATH);
+  const byId = new Map(objectives.filter((o) => o.projectId === projectId).map((o) => [o.id, o]));
+  order.forEach((id, index) => {
+    const objective = byId.get(id);
+    if (objective) objective.priority = index + 1;
+  });
+  writeJSON(OBJECTIVES_PATH, objectives);
+  res.json({ ok: true });
+});
+
+app.post('/api/objectives/:id/edit', (req, res) => {
+  const { goal, outcome } = req.body;
+  if (!goal || !goal.trim()) {
+    return res.status(400).json({ ok: false, error: 'Obiettivo mancante.' });
+  }
+  const objectives = readJSON(OBJECTIVES_PATH);
+  const objective = objectives.find((o) => o.id === req.params.id);
+  if (!objective) {
+    return res.status(404).json({ ok: false, error: 'Obiettivo non trovato.' });
+  }
+  objective.goal = goal.trim();
+  objective.outcome = (outcome || '').trim();
+  writeJSON(OBJECTIVES_PATH, objectives);
+  res.json({ ok: true, objective });
+});
+
+// Conferma esplicita di completamento — stesso pattern di finish-project:
+// mai automatico, e solo se non ci sono più task aperti sotto l'obiettivo.
+app.post('/api/objectives/:id/finish', (req, res) => {
+  const objectives = readJSON(OBJECTIVES_PATH);
+  const steps = readJSON(STEPS_PATH);
+  const objective = objectives.find((o) => o.id === req.params.id);
+  if (!objective) {
+    return res.status(404).json({ ok: false, error: 'Obiettivo non trovato.' });
+  }
+  const hasOpenStep = steps.some((s) => s.objectiveId === objective.id && !s.done);
+  if (hasOpenStep) {
+    return res.status(400).json({ ok: false, error: "L'obiettivo ha ancora task aperti." });
+  }
+  objective.completed = true;
+  objective.completedAt = new Date().toISOString();
+  writeJSON(OBJECTIVES_PATH, objectives);
+  res.json({ ok: true });
+});
+
+app.post('/api/objectives/:id/delete', (req, res) => {
+  const objectives = readJSON(OBJECTIVES_PATH);
+  const steps = readJSON(STEPS_PATH);
+  const objective = objectives.find((o) => o.id === req.params.id);
+  if (!objective) {
+    return res.status(404).json({ ok: false, error: 'Obiettivo non trovato.' });
+  }
+  const hasSteps = steps.some((s) => s.objectiveId === objective.id);
+  if (hasSteps) {
+    return res.status(400).json({ ok: false, error: 'Sposta o cancella prima i task di questo obiettivo.' });
+  }
+  const remaining = objectives.filter((o) => o.id !== req.params.id);
+  writeJSON(OBJECTIVES_PATH, remaining);
+  res.json({ ok: true });
 });
 
 app.get('/api/settings', (req, res) => {
