@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { ArrowDown, ArrowUp, Check, GripVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { ProjectsData, Step } from '@/lib/types'
+import { formatObjective } from '@/lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -262,7 +263,7 @@ function AddObjectiveDialog({ projectId, onAdded }: { projectId: string; onAdded
   const [pending, setPending] = useState(false)
 
   async function handleCreate() {
-    if (!goal.trim()) return
+    if (!goal.trim() || !outcome.trim()) return
     setPending(true)
     try {
       await api.addObjective(projectId, goal.trim(), outcome.trim())
@@ -297,8 +298,70 @@ function AddObjectiveDialog({ projectId, onAdded }: { projectId: string; onAdded
           />
         </div>
         <DialogFooter>
-          <Button disabled={pending || !goal.trim()} onClick={handleCreate}>
+          <Button disabled={pending || !goal.trim() || !outcome.trim()} onClick={handleCreate}>
             Crea
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function EditObjectiveDialog({
+  objective,
+  onSaved,
+}: {
+  objective: { id: string; goal: string; outcome: string }
+  onSaved: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [goal, setGoal] = useState(objective.goal)
+  const [outcome, setOutcome] = useState(objective.outcome)
+  const [pending, setPending] = useState(false)
+
+  function handleOpenChange(next: boolean) {
+    if (next) {
+      setGoal(objective.goal)
+      setOutcome(objective.outcome)
+    }
+    setOpen(next)
+  }
+
+  async function handleSave() {
+    if (!goal.trim() || !outcome.trim()) return
+    setPending(true)
+    try {
+      await api.editObjective(objective.id, goal.trim(), outcome.trim())
+      setOpen(false)
+      onSaved()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Non riesco a salvare l'obiettivo.")
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger render={<Button size="sm" variant="ghost" />}>
+        <Pencil className="size-3.5" /> Modifica
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Modifica obiettivo</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-2">
+          <Input placeholder="Obiettivo (es. Lanciare la demo)…" value={goal} onChange={(e) => setGoal(e.target.value)} />
+          <Input
+            placeholder="Risultato (es. per ottenere il primo utente reale)…"
+            value={outcome}
+            onChange={(e) => setOutcome(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+          />
+        </div>
+        <DialogFooter>
+          <Button disabled={pending || !goal.trim() || !outcome.trim()} onClick={handleSave}>
+            Salva
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -363,17 +426,22 @@ function ObjectiveSection({
       } ${draggable && isDragOver ? 'border-t-2 border-t-primary' : ''}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-sm font-medium">{objective.goal}</p>
-          {objective.outcome && <p className="text-xs text-muted-foreground">{objective.outcome}</p>}
+        <p className="text-sm">{formatObjective(objective.goal, objective.outcome)}</p>
+        <div className="flex items-center gap-2">
+          {objective.active && (
+            <EditObjectiveDialog
+              objective={{ id: objective.id, goal: objective.goal, outcome: objective.outcome }}
+              onSaved={onChange}
+            />
+          )}
+          {objective.completed ? (
+            <Badge variant="outline">completato</Badge>
+          ) : objective.active ? (
+            <Badge className="bg-primary/10 text-primary">attivo</Badge>
+          ) : (
+            <Badge variant="outline">in coda</Badge>
+          )}
         </div>
-        {objective.completed ? (
-          <Badge variant="outline">completato</Badge>
-        ) : objective.active ? (
-          <Badge className="bg-primary/10 text-primary">attivo</Badge>
-        ) : (
-          <Badge variant="outline">in coda</Badge>
-        )}
       </div>
       <ProjectBacklog
         steps={objective.steps}

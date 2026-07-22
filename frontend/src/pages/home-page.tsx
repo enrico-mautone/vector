@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AlertTriangle, CheckCircle2, Flame, Quote as QuoteIcon } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { HomeData } from '@/lib/types'
+import { formatObjective } from '@/lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -190,8 +191,7 @@ function ActionCard({
           <div className="flex flex-col gap-0.5">
             {project.activeObjectiveGoal && (
               <p className="text-xs text-muted-foreground">
-                Obiettivo: {project.activeObjectiveGoal}
-                {project.activeObjectiveOutcome ? ` ${project.activeObjectiveOutcome}` : ''}
+                {formatObjective(project.activeObjectiveGoal, project.activeObjectiveOutcome)}
               </p>
             )}
             <p className="text-sm">{project.nextStepText}</p>
