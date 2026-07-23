@@ -406,6 +406,7 @@ function ObjectiveSection({
   onDragOver,
   onDragLeave,
   onDrop,
+  onActivate,
 }: {
   objective: ProjectsData['projects'][number]['objectives'][number]
   projectId: string
@@ -420,6 +421,7 @@ function ObjectiveSection({
   onDragOver?: (e: DragEvent) => void
   onDragLeave?: () => void
   onDrop?: (e: DragEvent) => void
+  onActivate?: () => void
 }) {
   const [confirmFinish, setConfirmFinish] = useState(false)
   const [pending, setPending] = useState(false)
@@ -477,7 +479,18 @@ function ObjectiveSection({
           ) : objective.active ? (
             <Badge className="bg-primary/10 text-primary">attivo</Badge>
           ) : (
-            <Badge variant="outline">in coda</Badge>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onActivate?.()
+              }}
+              title="Rendi questo l'obiettivo attivo"
+            >
+              <Badge variant="outline" className="cursor-pointer hover:bg-accent">
+                in coda
+              </Badge>
+            </button>
           )}
         </div>
       </div>
@@ -624,6 +637,16 @@ export function ProjectsPage() {
     load()
   }
 
+  async function handleActivateObjective(project: ProjectsData['projects'][number], objectiveId: string) {
+    const order = project.objectives.map((o) => o.id)
+    const index = order.indexOf(objectiveId)
+    if (index === -1) return
+    order.splice(index, 1)
+    order.unshift(objectiveId)
+    await api.reorderObjectives(project.id, order)
+    load()
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
@@ -704,6 +727,7 @@ export function ProjectsPage() {
                       e.preventDefault()
                       handleObjectiveDrop(p, o.id)
                     }}
+                    onActivate={queued ? () => handleActivateObjective(p, o.id) : undefined}
                   />
                 )
               })}
