@@ -262,6 +262,11 @@ function ProjectBacklog({
                 <div key={s.id} className="flex items-center gap-2 rounded-md border border-dashed px-3 py-2 opacity-60">
                   <Checkbox checked disabled={readOnly} onCheckedChange={() => !readOnly && handleToggle(s.id)} />
                   <span className="flex-1 text-sm line-through">{s.text}</span>
+                  {s.completedAt && (
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {new Date(s.completedAt).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    </span>
+                  )}
                   {!readOnly && (
                     <Button variant="ghost" size="icon" className="size-7" onClick={() => handleDelete(s.id)}>
                       <Trash2 className="size-3.5" />

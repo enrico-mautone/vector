@@ -61,6 +61,7 @@ export interface Step {
   objectiveId: string
   text: string
   done: boolean
+  completedAt: string | null
   createdAt: string
 }
 

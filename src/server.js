@@ -414,6 +414,7 @@ app.post('/api/home/complete-step', (req, res) => {
   }
 
   step.done = true;
+  step.completedAt = new Date().toISOString();
   writeJSON(STEPS_PATH, steps);
 
   const projectEntry = todayEntry.projects[projectId] || { steps: [] };
@@ -553,6 +554,7 @@ app.post('/api/steps/:id/toggle', (req, res) => {
   const step = steps.find((s) => s.id === req.params.id);
   if (step) {
     step.done = !step.done;
+    step.completedAt = step.done ? new Date().toISOString() : null;
     writeJSON(STEPS_PATH, steps);
   }
   res.json({ ok: true, step });
