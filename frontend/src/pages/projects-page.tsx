@@ -53,6 +53,7 @@ function ProjectBacklog({
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
+  const [completedOpen, setCompletedOpen] = useState(false)
 
   const open = steps.filter((s) => !s.done)
   const done = steps.filter((s) => s.done)
@@ -248,18 +249,26 @@ function ProjectBacklog({
         <>
           <Separator />
           <div className="flex flex-col gap-2">
-            <p className="text-xs text-muted-foreground">Completati</p>
-            {done.map((s) => (
-              <div key={s.id} className="flex items-center gap-2 rounded-md border border-dashed px-3 py-2 opacity-60">
-                <Checkbox checked disabled={readOnly} onCheckedChange={() => !readOnly && handleToggle(s.id)} />
-                <span className="flex-1 text-sm line-through">{s.text}</span>
-                {!readOnly && (
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => handleDelete(s.id)}>
-                    <Trash2 className="size-3.5" />
-                  </Button>
-                )}
-              </div>
-            ))}
+            <button
+              type="button"
+              className="flex items-center gap-1 text-xs text-muted-foreground"
+              onClick={() => setCompletedOpen((v) => !v)}
+            >
+              {completedOpen ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+              Completati ({done.length})
+            </button>
+            {completedOpen &&
+              done.map((s) => (
+                <div key={s.id} className="flex items-center gap-2 rounded-md border border-dashed px-3 py-2 opacity-60">
+                  <Checkbox checked disabled={readOnly} onCheckedChange={() => !readOnly && handleToggle(s.id)} />
+                  <span className="flex-1 text-sm line-through">{s.text}</span>
+                  {!readOnly && (
+                    <Button variant="ghost" size="icon" className="size-7" onClick={() => handleDelete(s.id)}>
+                      <Trash2 className="size-3.5" />
+                    </Button>
+                  )}
+                </div>
+              ))}
           </div>
         </>
       )}
