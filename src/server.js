@@ -492,7 +492,7 @@ app.post('/api/steps/add', (req, res) => {
   }
   const steps = readJSON(STEPS_PATH);
   if (text && text.trim()) {
-    steps.push({ id: generateId(), projectId, objectiveId, text: text.trim(), done: false, createdAt: new Date().toISOString() });
+    steps.unshift({ id: generateId(), projectId, objectiveId, text: text.trim(), done: false, completedAt: null, createdAt: new Date().toISOString() });
     writeJSON(STEPS_PATH, steps);
   }
   res.json({ ok: true, steps: steps.filter((s) => s.objectiveId === objectiveId) });
@@ -507,9 +507,8 @@ app.post('/api/steps/bulk', (req, res) => {
   const newTexts = parseBulkSteps(bulkText || '');
   if (newTexts.length > 0) {
     const createdAt = new Date().toISOString();
-    newTexts.forEach((text) => {
-      steps.push({ id: generateId(), projectId, objectiveId, text, done: false, createdAt });
-    });
+    const newSteps = newTexts.map((text) => ({ id: generateId(), projectId, objectiveId, text, done: false, completedAt: null, createdAt }));
+    steps.unshift(...newSteps);
     writeJSON(STEPS_PATH, steps);
   }
   res.json({ ok: true, steps: steps.filter((s) => s.objectiveId === objectiveId) });
