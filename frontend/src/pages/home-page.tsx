@@ -172,7 +172,8 @@ function ActionCard({
             </Badge>
           )}
           {!project.doneToday && project.urgent && <Badge variant="destructive">Urgente</Badge>}
-          {data.config.limitDailyTasksByPriority && (
+          {!project.hasBacklog && <Badge variant="outline">senza backlog</Badge>}
+          {project.hasBacklog && data.config.limitDailyTasksByPriority && (
             <Badge variant={limitReached ? 'destructive' : 'outline'} className="font-mono">
               {project.dailyTaskLimit === 0
                 ? 'bloccato'

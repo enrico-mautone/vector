@@ -299,32 +299,39 @@ function buildHomeData(quote) {
   // Un progetto resta visibile in Home finché non viene confermato come
   // terminato (config.projects[].archived) — non sparisce solo perché ha
   // già ricevuto uno step oggi o perché non è tra i primi per priorità.
-  // I progetti senza nessuno step (mai avuto un backlog) sono invece esclusi
-  // del tutto: non hanno nulla da fare, quindi non contano né per l'elenco
-  // né per il gate "Lo devi fare!!!!". L'ordine è fisso per priorità (mai
-  // per stato del giorno), così spuntare un'attività non fa "saltare" i
-  // progetti in lista.
+  // I progetti senza nessuno step (mai avuto un backlog) compaiono comunque
+  // in fondo alla lista, ma restano puramente informativi: nessuna azione
+  // possibile, non contano per il gate "Lo devi fare!!!!" né per il tetto
+  // "Non esagerare!!" (rank/dailyTaskLimit nulli). L'ordine è fisso per
+  // priorità (mai per stato del giorno), così spuntare un'attività non fa
+  // "saltare" i progetti in lista.
   let priorAllDone = true;
   const ranked = activeProjectsByPriority(config, steps);
-  const actionsToday = ranked
-    .map((p, i) => {
-      const rank = i + 1;
+  const rankById = new Map(ranked.map((p, i) => [p.id, i + 1]));
+  const allActive = config.projects
+    .filter((p) => !p.archived)
+    .sort((a, b) => a.priority - b.priority);
+  const actionsToday = allActive
+    .map((p) => {
+      const hasBacklog = rankById.has(p.id);
+      const rank = rankById.get(p.id) || null;
       const completedTodayCount = stepsLoggedToday(todayEntry, p.id).length;
       const doneToday = completedTodayCount > 0;
       const last = lastDoneDate(log, p.id, today);
       const daysSince = last ? daysBetween(last, today) : null;
-      const urgent = !doneToday && (daysSince === null || daysSince >= config.urgencyThresholdDays);
-      const hasBacklog = steps.some((s) => s.projectId === p.id);
+      const urgent = hasBacklog && !doneToday && (daysSince === null || daysSince >= config.urgencyThresholdDays);
       const projectObjectives = objectives.filter((o) => o.projectId === p.id);
       const activeObjs = activeObjectivesByPriority(objectives, p.id);
-      const activeObjective = activeObjs[0];
+      const activeObjective = hasBacklog ? activeObjs[0] : null;
       const objectiveSteps = activeObjective ? steps.filter((s) => s.objectiveId === activeObjective.id) : [];
       const nextStep = activeObjective ? objectiveSteps.find((s) => !s.done) : null;
-      const objectiveComplete = !!(activeObjective && objectiveSteps.length > 0 && !nextStep);
-      const allObjectivesDone = projectObjectives.length > 0 && activeObjs.length === 0;
-      const activeObjectiveEmpty = !!(activeObjective && objectiveSteps.length === 0);
-      const workable = priorAllDone;
-      priorAllDone = priorAllDone && (doneToday || !hasBacklog);
+      const objectiveComplete = hasBacklog && !!(activeObjective && objectiveSteps.length > 0 && !nextStep);
+      const allObjectivesDone = hasBacklog && projectObjectives.length > 0 && activeObjs.length === 0;
+      const activeObjectiveEmpty = hasBacklog && !!(activeObjective && objectiveSteps.length === 0);
+      const workable = hasBacklog && priorAllDone;
+      if (hasBacklog) {
+        priorAllDone = priorAllDone && doneToday;
+      }
       return {
         ...p,
         doneToday,
@@ -341,7 +348,7 @@ function buildHomeData(quote) {
         allObjectivesDone,
         activeObjectiveEmpty,
         priorityRank: rank,
-        dailyTaskLimit: dailyTaskLimitForRank(rank),
+        dailyTaskLimit: rank ? dailyTaskLimitForRank(rank) : 0,
         completedTodayCount,
       };
     })
