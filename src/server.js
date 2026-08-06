@@ -1,25 +1,14 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const db = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const CONFIG_PATH = path.join(__dirname, '..', 'data', 'config.json');
-const LOG_PATH = path.join(__dirname, '..', 'data', 'log.json');
-const STEPS_PATH = path.join(__dirname, '..', 'data', 'steps.json');
-const OBJECTIVES_PATH = path.join(__dirname, '..', 'data', 'objectives.json');
 const FRONTEND_DIST = path.join(__dirname, '..', 'frontend', 'dist');
 
 app.use(express.json());
-
-function readJSON(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-}
-
-function writeJSON(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-}
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -288,11 +277,11 @@ async function fetchRandomQuote() {
   }
 }
 
-function buildHomeData(quote) {
-  const config = readJSON(CONFIG_PATH);
-  const log = readJSON(LOG_PATH);
-  const steps = readJSON(STEPS_PATH);
-  const objectives = readJSON(OBJECTIVES_PATH);
+async function buildHomeData(quote) {
+  const config = await db.readConfig();
+  const log = await db.readLog();
+  const steps = await db.readSteps();
+  const objectives = await db.readObjectives();
   const today = todayStr();
   const todayEntry = getEntry(log, today) || { projects: {}, habits: {} };
 
@@ -368,7 +357,7 @@ function buildHomeData(quote) {
 
 app.get('/api/home', async (req, res) => {
   const quote = await fetchRandomQuote();
-  res.json(buildHomeData(quote));
+  res.json(await buildHomeData(quote));
 });
 
 // Segna eseguito, direttamente da home, il prossimo step aperto di un
@@ -376,11 +365,11 @@ app.get('/api/home', async (req, res) => {
 // steps.json + lo registra nel log di oggi), ma un solo step alla volta.
 // Rispetta il gate di priorità se "Lo devi fare!!!!" è attivo, e il tetto
 // giornaliero per progetto se "Non esagerare!!" è attivo.
-app.post('/api/home/complete-step', (req, res) => {
+app.post('/api/home/complete-step', async (req, res) => {
   const { projectId, stepId } = req.body;
-  const config = readJSON(CONFIG_PATH);
-  const log = readJSON(LOG_PATH);
-  const steps = readJSON(STEPS_PATH);
+  const config = await db.readConfig();
+  const log = await db.readLog();
+  const steps = await db.readSteps();
   const today = todayStr();
 
   const step = steps.find((s) => s.id === stepId && s.projectId === projectId && !s.done);
@@ -395,7 +384,7 @@ app.post('/api/home/complete-step', (req, res) => {
   });
   loggedStepsByProject[projectId] = loggedStepsByProject[projectId].concat([{ stepId }]);
 
-  const objectives = readJSON(OBJECTIVES_PATH);
+  const objectives = await db.readObjectives();
   const activeObjective = activeObjectivesByPriority(objectives, projectId)[0];
   if (!activeObjective || step.objectiveId !== activeObjective.id) {
     return res.status(400).json({ ok: false, error: 'Questo task appartiene a un obiettivo non ancora attivo.' });
@@ -422,7 +411,7 @@ app.post('/api/home/complete-step', (req, res) => {
 
   step.done = true;
   step.completedAt = new Date().toISOString();
-  writeJSON(STEPS_PATH, steps);
+  await db.writeSteps(steps);
 
   const projectEntry = todayEntry.projects[projectId] || { steps: [] };
   projectEntry.steps = projectEntry.steps.concat([{ stepId, minutes: 0 }]);
@@ -434,7 +423,7 @@ app.post('/api/home/complete-step', (req, res) => {
   } else {
     log.push(todayEntry);
   }
-  writeJSON(LOG_PATH, log);
+  await db.writeLog(log);
 
   const nextStep = steps.find((s) => s.projectId === projectId && !s.done);
   res.json({
@@ -447,10 +436,10 @@ app.post('/api/home/complete-step', (req, res) => {
 // Conferma esplicita ("il progetto è terminato?") che rimuove un progetto
 // dalla Home: si arriva qui solo quando non ha più step aperti, e solo per
 // azione diretta dell'utente — mai in automatico.
-app.post('/api/home/finish-project', (req, res) => {
+app.post('/api/home/finish-project', async (req, res) => {
   const { projectId } = req.body;
-  const config = readJSON(CONFIG_PATH);
-  const steps = readJSON(STEPS_PATH);
+  const config = await db.readConfig();
+  const steps = await db.readSteps();
 
   const project = config.projects.find((p) => p.id === projectId);
   if (!project) {
@@ -462,15 +451,15 @@ app.post('/api/home/finish-project', (req, res) => {
   }
 
   project.archived = true;
-  writeJSON(CONFIG_PATH, config);
+  await db.writeConfig(config);
   res.json({ ok: true });
 });
 
 // Segna/de-segna una habit direttamente da home.
-app.post('/api/home/toggle-habit', (req, res) => {
+app.post('/api/home/toggle-habit', async (req, res) => {
   const { habitId } = req.body;
-  const config = readJSON(CONFIG_PATH);
-  const log = readJSON(LOG_PATH);
+  const config = await db.readConfig();
+  const log = await db.readLog();
   const today = todayStr();
 
   if (!config.habits.some((h) => h.id === habitId)) {
@@ -487,36 +476,36 @@ app.post('/api/home/toggle-habit', (req, res) => {
   } else {
     log.push(todayEntry);
   }
-  writeJSON(LOG_PATH, log);
+  await db.writeLog(log);
 
   res.json({ ok: true, done, streak: habitStreak(log, habitId, today) });
 });
 
-app.post('/api/steps/add', (req, res) => {
+app.post('/api/steps/add', async (req, res) => {
   const { projectId, objectiveId, text } = req.body;
   if (!objectiveId) {
     return res.status(400).json({ ok: false, error: 'Obiettivo mancante.' });
   }
-  const steps = readJSON(STEPS_PATH);
+  const steps = await db.readSteps();
   if (text && text.trim()) {
     steps.unshift({ id: generateId(), projectId, objectiveId, text: text.trim(), done: false, completedAt: null, createdAt: new Date().toISOString() });
-    writeJSON(STEPS_PATH, steps);
+    await db.writeSteps(steps);
   }
   res.json({ ok: true, steps: steps.filter((s) => s.objectiveId === objectiveId) });
 });
 
-app.post('/api/steps/bulk', (req, res) => {
+app.post('/api/steps/bulk', async (req, res) => {
   const { projectId, objectiveId, bulkText } = req.body;
   if (!objectiveId) {
     return res.status(400).json({ ok: false, error: 'Obiettivo mancante.' });
   }
-  const steps = readJSON(STEPS_PATH);
+  const steps = await db.readSteps();
   const newTexts = parseBulkSteps(bulkText || '');
   if (newTexts.length > 0) {
     const createdAt = new Date().toISOString();
     const newSteps = newTexts.map((text) => ({ id: generateId(), projectId, objectiveId, text, done: false, completedAt: null, createdAt }));
     steps.unshift(...newSteps);
-    writeJSON(STEPS_PATH, steps);
+    await db.writeSteps(steps);
   }
   res.json({ ok: true, steps: steps.filter((s) => s.objectiveId === objectiveId) });
 });
@@ -524,12 +513,12 @@ app.post('/api/steps/bulk', (req, res) => {
 // Riordina gli step di un progetto secondo l'ordine (array di id) ricevuto
 // dal drag & drop lato client. Gli step degli altri progetti non sono
 // toccati; quelli del progetto vengono riscritti nel nuovo ordine.
-app.post('/api/steps/reorder', (req, res) => {
+app.post('/api/steps/reorder', async (req, res) => {
   const { projectId, order } = req.body;
   if (!projectId || !Array.isArray(order)) {
     return res.status(400).json({ ok: false });
   }
-  const steps = readJSON(STEPS_PATH);
+  const steps = await db.readSteps();
   const projectSteps = steps.filter((s) => s.projectId === projectId);
   const byId = new Map(projectSteps.map((s) => [s.id, s]));
   const reordered = order.map((id) => byId.get(id)).filter(Boolean);
@@ -537,66 +526,66 @@ app.post('/api/steps/reorder', (req, res) => {
     if (!order.includes(s.id)) reordered.push(s);
   });
   const otherSteps = steps.filter((s) => s.projectId !== projectId);
-  writeJSON(STEPS_PATH, otherSteps.concat(reordered));
+  await db.writeSteps(otherSteps.concat(reordered));
   res.json({ ok: true });
 });
 
-app.post('/api/steps/:id/edit', (req, res) => {
+app.post('/api/steps/:id/edit', async (req, res) => {
   const { text } = req.body;
   if (!text || !text.trim()) {
     return res.status(400).json({ ok: false });
   }
-  const steps = readJSON(STEPS_PATH);
+  const steps = await db.readSteps();
   const step = steps.find((s) => s.id === req.params.id);
   if (step) {
     step.text = text.trim();
-    writeJSON(STEPS_PATH, steps);
+    await db.writeSteps(steps);
   }
   res.json({ ok: true, step });
 });
 
-app.post('/api/steps/:id/toggle', (req, res) => {
-  const steps = readJSON(STEPS_PATH);
+app.post('/api/steps/:id/toggle', async (req, res) => {
+  const steps = await db.readSteps();
   const step = steps.find((s) => s.id === req.params.id);
   if (step) {
     step.done = !step.done;
     step.completedAt = step.done ? new Date().toISOString() : null;
-    writeJSON(STEPS_PATH, steps);
+    await db.writeSteps(steps);
   }
   res.json({ ok: true, step });
 });
 
-app.post('/api/steps/:id/delete', (req, res) => {
-  const steps = readJSON(STEPS_PATH);
+app.post('/api/steps/:id/delete', async (req, res) => {
+  const steps = await db.readSteps();
   const remaining = steps.filter((s) => s.id !== req.params.id);
-  writeJSON(STEPS_PATH, remaining);
+  await db.writeSteps(remaining);
   res.json({ ok: true });
 });
 
 // Sposta uno step su un altro obiettivo (stesso progetto) via drag & drop.
-app.post('/api/steps/:id/move', (req, res) => {
+app.post('/api/steps/:id/move', async (req, res) => {
   const { objectiveId } = req.body;
   if (!objectiveId) {
     return res.status(400).json({ ok: false, error: 'Obiettivo mancante.' });
   }
-  const steps = readJSON(STEPS_PATH);
+  const steps = await db.readSteps();
   const step = steps.find((s) => s.id === req.params.id);
   if (!step) {
     return res.status(404).json({ ok: false, error: 'Step non trovato.' });
   }
-  const objectives = readJSON(OBJECTIVES_PATH);
+  const objectives = await db.readObjectives();
   const targetObjective = objectives.find((o) => o.id === objectiveId);
   if (!targetObjective || targetObjective.projectId !== step.projectId) {
     return res.status(400).json({ ok: false, error: 'Obiettivo non valido per questo progetto.' });
   }
   step.objectiveId = objectiveId;
-  writeJSON(STEPS_PATH, steps);
+  await db.writeSteps(steps);
   res.json({ ok: true, step });
 });
 
-app.get('/api/habits', (req, res) => {
-  const config = readJSON(CONFIG_PATH);
-  const log = readJSON(LOG_PATH);
+app.get('/api/habits', async (req, res) => {
+  const config = await db.readConfig();
+  const log = await db.readLog();
   const habitDoneMap = buildHabitDoneMap(config, log);
   const view = req.query.view === 'month' || req.query.view === 'week' ? req.query.view : 'year';
 
@@ -639,10 +628,10 @@ app.get('/api/habits', (req, res) => {
   res.json({ view, ...extra });
 });
 
-app.get('/api/projects', (req, res) => {
-  const config = readJSON(CONFIG_PATH);
-  const steps = readJSON(STEPS_PATH);
-  const objectives = readJSON(OBJECTIVES_PATH);
+app.get('/api/projects', async (req, res) => {
+  const config = await db.readConfig();
+  const steps = await db.readSteps();
+  const objectives = await db.readObjectives();
   const projects = config.projects
     .slice()
     .sort((a, b) => a.priority - b.priority)
@@ -663,37 +652,37 @@ app.get('/api/projects', (req, res) => {
   res.json({ projects });
 });
 
-app.post('/api/projects/add', (req, res) => {
+app.post('/api/projects/add', async (req, res) => {
   const { name } = req.body;
   if (!name || !name.trim()) {
     return res.status(400).json({ ok: false, error: 'Nome progetto mancante.' });
   }
-  const config = readJSON(CONFIG_PATH);
+  const config = await db.readConfig();
   const maxPriority = config.projects.reduce((max, p) => Math.max(max, p.priority), 0);
   const project = { id: generateId(), name: name.trim(), priority: maxPriority + 1 };
   config.projects.push(project);
-  writeJSON(CONFIG_PATH, config);
+  await db.writeConfig(config);
   res.json({ ok: true, project });
 });
 
-app.post('/api/projects/reorder', (req, res) => {
+app.post('/api/projects/reorder', async (req, res) => {
   const { order } = req.body;
   if (!Array.isArray(order)) {
     return res.status(400).json({ ok: false, error: 'Ordine non valido.' });
   }
-  const config = readJSON(CONFIG_PATH);
+  const config = await db.readConfig();
   const byId = new Map(config.projects.map((p) => [p.id, p]));
   order.forEach((id, index) => {
     const project = byId.get(id);
     if (project) project.priority = index + 1;
   });
-  writeJSON(CONFIG_PATH, config);
+  await db.writeConfig(config);
   res.json({ ok: true, config });
 });
 
-app.post('/api/projects/:id/edit', (req, res) => {
+app.post('/api/projects/:id/edit', async (req, res) => {
   const { name, description, valueEconomic, valueOpportunity, valueUrgency, valueEffort } = req.body;
-  const config = readJSON(CONFIG_PATH);
+  const config = await db.readConfig();
   const project = config.projects.find((p) => p.id === req.params.id);
   if (!project) {
     return res.status(404).json({ ok: false, error: 'Progetto non trovato.' });
@@ -710,14 +699,14 @@ app.post('/api/projects/:id/edit', (req, res) => {
   project.valueOpportunity = clamp15(valueOpportunity);
   project.valueUrgency = clamp15(valueUrgency);
   project.valueEffort = clamp15(valueEffort);
-  writeJSON(CONFIG_PATH, config);
+  await db.writeConfig(config);
   res.json({ ok: true, project });
 });
 
-app.get('/api/objectives', (req, res) => {
+app.get('/api/objectives', async (req, res) => {
   const { projectId } = req.query;
-  const objectives = readJSON(OBJECTIVES_PATH);
-  const steps = readJSON(STEPS_PATH);
+  const objectives = await db.readObjectives();
+  const steps = await db.readSteps();
   const active = activeObjectivesByPriority(objectives, projectId)[0] || null;
   const list = objectives
     .filter((o) => o.projectId === projectId)
@@ -732,12 +721,12 @@ app.get('/api/objectives', (req, res) => {
   res.json({ objectives: list });
 });
 
-app.post('/api/objectives/add', (req, res) => {
+app.post('/api/objectives/add', async (req, res) => {
   const { projectId, goal, outcome } = req.body;
   if (!projectId || !goal || !goal.trim()) {
     return res.status(400).json({ ok: false, error: 'Obiettivo mancante.' });
   }
-  const objectives = readJSON(OBJECTIVES_PATH);
+  const objectives = await db.readObjectives();
   const maxPriority = objectives
     .filter((o) => o.projectId === projectId)
     .reduce((max, o) => Math.max(max, o.priority), 0);
@@ -752,46 +741,46 @@ app.post('/api/objectives/add', (req, res) => {
     createdAt: new Date().toISOString(),
   };
   objectives.push(objective);
-  writeJSON(OBJECTIVES_PATH, objectives);
+  await db.writeObjectives(objectives);
   res.json({ ok: true, objective });
 });
 
-app.post('/api/objectives/reorder', (req, res) => {
+app.post('/api/objectives/reorder', async (req, res) => {
   const { projectId, order } = req.body;
   if (!projectId || !Array.isArray(order)) {
     return res.status(400).json({ ok: false, error: 'Ordine non valido.' });
   }
-  const objectives = readJSON(OBJECTIVES_PATH);
+  const objectives = await db.readObjectives();
   const byId = new Map(objectives.filter((o) => o.projectId === projectId).map((o) => [o.id, o]));
   order.forEach((id, index) => {
     const objective = byId.get(id);
     if (objective) objective.priority = index + 1;
   });
-  writeJSON(OBJECTIVES_PATH, objectives);
+  await db.writeObjectives(objectives);
   res.json({ ok: true });
 });
 
-app.post('/api/objectives/:id/edit', (req, res) => {
+app.post('/api/objectives/:id/edit', async (req, res) => {
   const { goal, outcome } = req.body;
   if (!goal || !goal.trim()) {
     return res.status(400).json({ ok: false, error: 'Obiettivo mancante.' });
   }
-  const objectives = readJSON(OBJECTIVES_PATH);
+  const objectives = await db.readObjectives();
   const objective = objectives.find((o) => o.id === req.params.id);
   if (!objective) {
     return res.status(404).json({ ok: false, error: 'Obiettivo non trovato.' });
   }
   objective.goal = goal.trim();
   objective.outcome = (outcome || '').trim();
-  writeJSON(OBJECTIVES_PATH, objectives);
+  await db.writeObjectives(objectives);
   res.json({ ok: true, objective });
 });
 
 // Conferma esplicita di completamento — stesso pattern di finish-project:
 // mai automatico, e solo se non ci sono più task aperti sotto l'obiettivo.
-app.post('/api/objectives/:id/finish', (req, res) => {
-  const objectives = readJSON(OBJECTIVES_PATH);
-  const steps = readJSON(STEPS_PATH);
+app.post('/api/objectives/:id/finish', async (req, res) => {
+  const objectives = await db.readObjectives();
+  const steps = await db.readSteps();
   const objective = objectives.find((o) => o.id === req.params.id);
   if (!objective) {
     return res.status(404).json({ ok: false, error: 'Obiettivo non trovato.' });
@@ -802,13 +791,13 @@ app.post('/api/objectives/:id/finish', (req, res) => {
   }
   objective.completed = true;
   objective.completedAt = new Date().toISOString();
-  writeJSON(OBJECTIVES_PATH, objectives);
+  await db.writeObjectives(objectives);
   res.json({ ok: true });
 });
 
-app.post('/api/objectives/:id/delete', (req, res) => {
-  const objectives = readJSON(OBJECTIVES_PATH);
-  const steps = readJSON(STEPS_PATH);
+app.post('/api/objectives/:id/delete', async (req, res) => {
+  const objectives = await db.readObjectives();
+  const steps = await db.readSteps();
   const objective = objectives.find((o) => o.id === req.params.id);
   if (!objective) {
     return res.status(404).json({ ok: false, error: 'Obiettivo non trovato.' });
@@ -818,24 +807,24 @@ app.post('/api/objectives/:id/delete', (req, res) => {
     return res.status(400).json({ ok: false, error: 'Sposta o cancella prima i task di questo obiettivo.' });
   }
   const remaining = objectives.filter((o) => o.id !== req.params.id);
-  writeJSON(OBJECTIVES_PATH, remaining);
+  await db.writeObjectives(remaining);
   res.json({ ok: true });
 });
 
-app.get('/api/settings', (req, res) => {
-  const config = readJSON(CONFIG_PATH);
+app.get('/api/settings', async (req, res) => {
+  const config = await db.readConfig();
   res.json({ config });
 });
 
-app.post('/api/settings', (req, res) => {
-  const config = readJSON(CONFIG_PATH);
+app.post('/api/settings', async (req, res) => {
+  const config = await db.readConfig();
   if ('enforcePriorityOrder' in req.body) {
     config.enforcePriorityOrder = req.body.enforcePriorityOrder === true;
   }
   if ('limitDailyTasksByPriority' in req.body) {
     config.limitDailyTasksByPriority = req.body.limitDailyTasksByPriority === true;
   }
-  writeJSON(CONFIG_PATH, config);
+  await db.writeConfig(config);
   res.json({ ok: true, config });
 });
 
@@ -846,6 +835,13 @@ if (fs.existsSync(FRONTEND_DIST)) {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`Vector in ascolto su http://localhost:${PORT}`);
-});
+db.initSchema()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Vector in ascolto su http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Errore inizializzazione schema DB:', err);
+    process.exit(1);
+  });
