@@ -1,10 +1,20 @@
 import type { HabitsData, HomeData, Objective, Project, ProjectsData, SettingsData } from './types'
+import { getToken } from './auth'
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
+  const token = getToken()
   const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...options,
   })
+  if (res.status === 401) {
+    // Token mancante/scaduto: notifica AuthProvider così l'app torna subito
+    // alla pagina di login, invece di restare bloccata su un errore muto.
+    window.dispatchEvent(new Event('vector:unauthorized'))
+  }
   const data = await res.json().catch(() => null)
   if (!res.ok) {
     throw new Error((data && data.error) || 'Qualcosa è andato storto.')

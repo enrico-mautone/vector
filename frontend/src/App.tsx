@@ -8,6 +8,8 @@ import { HomePage } from '@/pages/home-page'
 import { ProjectsPage } from '@/pages/projects-page'
 import { HabitsPage } from '@/pages/habits-page'
 import { SettingsPage } from '@/pages/settings-page'
+import { SignInPage } from '@/pages/signin-page'
+import { useAuth } from '@/lib/auth'
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   '/': { title: 'Oggi', subtitle: 'Dove punta la giornata' },
@@ -32,6 +34,20 @@ function PageHeader() {
 }
 
 function App() {
+  const { status } = useAuth()
+
+  // Nessuna rotta è raggiungibile senza autenticazione: finché lo stato non
+  // è confermato (verifica token in corso) non si mostra nulla, per evitare
+  // un flash di contenuto protetto; da anonimo l'unica UI possibile è il
+  // login, qualunque sia il path richiesto.
+  if (status === 'checking') return null
+  if (status === 'anonymous') return (
+    <>
+      <SignInPage />
+      <Toaster />
+    </>
+  )
+
   return (
     <TooltipProvider delay={200}>
       <SidebarProvider>

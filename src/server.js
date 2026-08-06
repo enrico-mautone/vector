@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const db = require('./db');
+const auth = require('./auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,6 +13,32 @@ const PORT = process.env.PORT || 3000;
 const FRONTEND_DIST = path.join(__dirname, '..', 'public');
 
 app.use(express.json());
+
+// Unica rotta pubblica sotto /api: il login. Tutto il resto di /api/* è
+// protetto dal middleware requireAuth montato subito dopo — nessuna route
+// aggiunta in futuro resta scoperta per dimenticanza.
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) {
+    return res.status(400).json({ ok: false, error: 'Email e password sono obbligatorie.' });
+  }
+  const user = await db.findUserByEmail(String(email).trim());
+  if (!user) {
+    return res.status(401).json({ ok: false, error: 'Credenziali non valide.' });
+  }
+  const valid = await auth.checkPassword(password, user.passwordHash);
+  if (!valid) {
+    return res.status(401).json({ ok: false, error: 'Credenziali non valide.' });
+  }
+  const token = auth.signToken(user);
+  res.json({ ok: true, token, email: user.email });
+});
+
+app.use('/api', auth.requireAuth);
+
+app.get('/api/auth/me', (req, res) => {
+  res.json({ ok: true, email: req.user.email });
+});
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);

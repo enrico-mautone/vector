@@ -76,7 +76,30 @@ async function initSchema() {
       limit_daily_tasks_by_priority boolean NOT NULL,
       CHECK (id = 1)
     );
+    CREATE TABLE IF NOT EXISTS users (
+      id text PRIMARY KEY,
+      email text NOT NULL UNIQUE,
+      password_hash text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
   `);
+}
+
+// ---- users (auth) ----
+
+async function findUserByEmail(email) {
+  const res = await pool.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase()]);
+  const r = res.rows[0];
+  if (!r) return null;
+  return { id: r.id, email: r.email, passwordHash: r.password_hash };
+}
+
+async function createUser({ id, email, passwordHash }) {
+  await pool.query(
+    `INSERT INTO users (id, email, password_hash) VALUES ($1,$2,$3)
+     ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash`,
+    [id, email.toLowerCase(), passwordHash]
+  );
 }
 
 // ---- config (projects + habits + settings) ----
@@ -309,4 +332,6 @@ module.exports = {
   writeSteps,
   readObjectives,
   writeObjectives,
+  findUserByEmail,
+  createUser,
 };
