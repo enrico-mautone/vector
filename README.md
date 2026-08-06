@@ -27,3 +27,16 @@ I dati (progetti, habit, log giornaliero, obiettivi, step) vivono su Postgres
 schema completo e i dettagli della migrazione. `src/db.js` è l'unico punto
 di accesso al database; `scripts/migrate-json-to-pg.js` è lo script one-off
 usato per l'import iniziale dai vecchi `data/*.json` (ormai rimossi).
+
+## Deploy su Vercel
+
+Il backend Express (`src/server.js`) gira su Vercel a costo zero di
+configurazione (rilevato automaticamente come Vercel Function). Il frontend
+buildato invece va in `public/` (non `frontend/dist/`) perché su Vercel
+`express.static()` viene ignorato — solo `public/**` è servito dalla CDN.
+`vercel.json` configura il build command (`cd frontend && npm install &&
+npm run build`, che produce l'output direttamente in `public/` — vedi
+`frontend/vite.config.ts`) e il rewrite SPA (ogni path non-`/api/*` senza
+un file statico corrispondente serve `index.html`, per il routing
+client-side). `DATABASE_URL` va impostata nelle Environment Variables del
+progetto Vercel, non letta da `.env`.
