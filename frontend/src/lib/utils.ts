@@ -19,13 +19,8 @@ export function computeValueScore(p: Pick<Project, 'valueEconomic' | 'valueOppor
   return (e + o + u) / f
 }
 
-// Mappa lo score continuo (min 3/5=0.6, max 15/1=15) su 1-5 simboli "$".
-// Soglie tarate su distribuzione empirica: effort medio (3) con le altre
-// componenti medio-alte dà "$$$"; punteggi estremi (effort 1, altre a 5) danno "$$$$$".
+// Un simbolo "$" per ogni punto intero di score (arrotondato), minimo 1.
+// Score va da 3/5=0.6 a 15/1=15, quindi i simboli non hanno un tetto fisso.
 export function valueScoreToDollars(score: number): number {
-  if (score >= 6) return 5
-  if (score >= 4.5) return 4
-  if (score >= 3) return 3
-  if (score >= 1.8) return 2
-  return 1
+  return Math.max(1, Math.round(score))
 }
