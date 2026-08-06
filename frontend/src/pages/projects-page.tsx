@@ -1,4 +1,4 @@
-import { useEffect, useState, type DragEvent } from 'react'
+import { useEffect, useRef, useState, type DragEvent } from 'react'
 import { toast } from 'sonner'
 import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, GripVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { api } from '@/lib/api'
@@ -603,6 +603,7 @@ export function ProjectsPage() {
   const [objDragOverId, setObjDragOverId] = useState<string | null>(null)
   const [openOverrides, setOpenOverrides] = useState<Record<string, boolean>>({})
   const [openProjectId, setOpenProjectId] = useState<string | undefined>(undefined)
+  const didInitOpenProject = useRef(false)
 
   function load() {
     api.projects().then(setData).catch(() => toast.error('Non riesco a caricare Progetti.'))
@@ -611,10 +612,11 @@ export function ProjectsPage() {
   useEffect(load, [])
 
   useEffect(() => {
-    if (data && openProjectId === undefined) {
+    if (data && !didInitOpenProject.current) {
+      didInitOpenProject.current = true
       setOpenProjectId(data.projects[0]?.id)
     }
-  }, [data, openProjectId])
+  }, [data])
 
   if (!data) return <Skeleton className="h-96 w-full" />
 
@@ -680,7 +682,7 @@ export function ProjectsPage() {
       <CardContent>
         <Accordion
           value={openProjectId ? [openProjectId] : []}
-          onValueChange={(value) => setOpenProjectId(value[0] as string | undefined)}
+          onValueChange={(value) => setOpenProjectId(value[0] ?? undefined)}
         >
           {data.projects.map((p) => (
             <AccordionItem key={p.id} value={p.id}>
@@ -700,11 +702,11 @@ export function ProjectsPage() {
                   e.preventDefault()
                   handleDrop(p.id)
                 }}
-                className={`cursor-grab ${dragId === p.id ? 'opacity-40' : ''} ${
+                className={`${dragId === p.id ? 'opacity-40' : ''} ${
                   dragOverId === p.id ? 'border-t-2 border-t-primary' : ''
                 }`}
               >
-                <AccordionTrigger>
+                <AccordionTrigger className="cursor-grab">
                   <GripVertical className="size-3.5 shrink-0 text-muted-foreground" />
                   <Badge variant="outline" className="font-mono">
                     {p.priority}
