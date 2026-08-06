@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { ProjectValueBadge } from '@/components/project-value-badge'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -163,6 +164,7 @@ function ActionCard({
               {project.priority}
             </Badge>
             <CardTitle className="text-base">{project.name}</CardTitle>
+            <ProjectValueBadge project={project} />
           </div>
           {project.doneToday && (
             <Badge className="bg-primary/10 text-primary">
