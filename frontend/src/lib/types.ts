@@ -3,6 +3,11 @@ export interface Project {
   name: string
   priority: number
   archived?: boolean
+  description?: string
+  valueEconomic?: number // 1-5
+  valueOpportunity?: number // 1-5
+  valueUrgency?: number // 1-5
+  valueEffort?: number // 1-5
 }
 
 export interface Habit {

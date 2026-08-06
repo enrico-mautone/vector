@@ -684,6 +684,29 @@ app.post('/api/projects/reorder', (req, res) => {
   res.json({ ok: true, config });
 });
 
+app.post('/api/projects/:id/edit', (req, res) => {
+  const { name, description, valueEconomic, valueOpportunity, valueUrgency, valueEffort } = req.body;
+  const config = readJSON(CONFIG_PATH);
+  const project = config.projects.find((p) => p.id === req.params.id);
+  if (!project) {
+    return res.status(404).json({ ok: false, error: 'Progetto non trovato.' });
+  }
+  if (!name || !name.trim()) {
+    return res.status(400).json({ ok: false, error: 'Nome progetto mancante.' });
+  }
+
+  const clamp15 = (v) => (v === undefined || v === null || v === '' ? undefined : Math.min(5, Math.max(1, Math.round(Number(v)))));
+
+  project.name = name.trim();
+  project.description = (description || '').trim() || undefined;
+  project.valueEconomic = clamp15(valueEconomic);
+  project.valueOpportunity = clamp15(valueOpportunity);
+  project.valueUrgency = clamp15(valueUrgency);
+  project.valueEffort = clamp15(valueEffort);
+  writeJSON(CONFIG_PATH, config);
+  res.json({ ok: true, project });
+});
+
 app.get('/api/objectives', (req, res) => {
   const { projectId } = req.query;
   const objectives = readJSON(OBJECTIVES_PATH);

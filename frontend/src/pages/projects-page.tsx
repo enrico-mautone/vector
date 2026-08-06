@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, type DragEvent } from 'react'
 import { toast } from 'sonner'
 import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, GripVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { api } from '@/lib/api'
-import type { ProjectsData, Step } from '@/lib/types'
-import { formatObjective } from '@/lib/utils'
+import type { Project, ProjectsData, Step } from '@/lib/types'
+import { computeValueScore, formatObjective, valueScoreToDollars } from '@/lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { Accordion, AccordionHeader, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   Dialog,
   DialogContent,
@@ -595,6 +596,166 @@ function AddProjectDialog({ onAdded }: { onAdded: () => void }) {
   )
 }
 
+const WSJF_FIELDS = {
+  valueEconomic: { label: 'Valore economico', hint: '1 = nessun impatto economico, 5 = impatto economico diretto e rilevante' },
+  valueOpportunity: { label: 'Opportunità', hint: '1 = nessuna nuova opportunità, 5 = apre opportunità significative' },
+  valueUrgency: { label: 'Urgenza', hint: '1 = nessuna scadenza, 5 = urgente/bloccante ora' },
+  valueEffort: { label: 'Sforzo', hint: '1 = poche ore, 5 = mesi di lavoro' },
+} as const
+
+function ScaleSelect({
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  label: string
+  hint: string
+  value: number | undefined
+  onChange: (v: number) => void
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-sm font-medium">{label}</span>
+      <div className="flex gap-1.5">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button key={n} type="button" onClick={() => onChange(n)}>
+            <Badge variant={value === n ? 'default' : 'outline'} className="size-7 cursor-pointer justify-center rounded-md text-sm">
+              {n}
+            </Badge>
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">{hint}</p>
+    </div>
+  )
+}
+
+function ProjectValueDialog({ project, onSaved }: { project: Project; onSaved: () => void }) {
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState(project.name)
+  const [description, setDescription] = useState(project.description ?? '')
+  const [valueEconomic, setValueEconomic] = useState<number | undefined>(project.valueEconomic)
+  const [valueOpportunity, setValueOpportunity] = useState<number | undefined>(project.valueOpportunity)
+  const [valueUrgency, setValueUrgency] = useState<number | undefined>(project.valueUrgency)
+  const [valueEffort, setValueEffort] = useState<number | undefined>(project.valueEffort)
+  const [pending, setPending] = useState(false)
+
+  function handleOpenChange(next: boolean) {
+    if (next) {
+      setName(project.name)
+      setDescription(project.description ?? '')
+      setValueEconomic(project.valueEconomic)
+      setValueOpportunity(project.valueOpportunity)
+      setValueUrgency(project.valueUrgency)
+      setValueEffort(project.valueEffort)
+    }
+    setOpen(next)
+  }
+
+  const previewScore = computeValueScore({ valueEconomic, valueOpportunity, valueUrgency, valueEffort })
+
+  async function handleSave() {
+    if (!name.trim()) return
+    setPending(true)
+    try {
+      await api.editProject(project.id, {
+        name: name.trim(),
+        description: description.trim(),
+        valueEconomic,
+        valueOpportunity,
+        valueUrgency,
+        valueEffort,
+      })
+      setOpen(false)
+      onSaved()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Non riesco a salvare il progetto.')
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger
+        render={
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-6"
+            aria-label="Modifica progetto"
+            onClick={(e) => e.stopPropagation()}
+          />
+        }
+      >
+        <Pencil className="size-3.5" />
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Scheda progetto</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4">
+          <Input placeholder="Nome del progetto…" value={name} onChange={(e) => setName(e.target.value)} />
+          <Textarea
+            placeholder="Descrizione (facoltativa)…"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+          />
+          <ScaleSelect {...WSJF_FIELDS.valueEconomic} value={valueEconomic} onChange={setValueEconomic} />
+          <ScaleSelect {...WSJF_FIELDS.valueOpportunity} value={valueOpportunity} onChange={setValueOpportunity} />
+          <ScaleSelect {...WSJF_FIELDS.valueUrgency} value={valueUrgency} onChange={setValueUrgency} />
+          <ScaleSelect {...WSJF_FIELDS.valueEffort} value={valueEffort} onChange={setValueEffort} />
+          <div className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
+            <span className="text-muted-foreground">Anteprima:</span>
+            {previewScore !== null ? (
+              <span className="font-mono text-emerald-600">
+                {'$'.repeat(valueScoreToDollars(previewScore))}{' '}
+                <span className="text-xs text-muted-foreground">(score {previewScore.toFixed(1)})</span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground">Non ancora valutato</span>
+            )}
+          </div>
+        </div>
+        <DialogFooter>
+          <Button disabled={pending || !name.trim()} onClick={handleSave}>
+            Salva
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function ProjectValueBadge({ project }: { project: Project }) {
+  const score = computeValueScore(project)
+  if (score === null) {
+    return (
+      <span className="text-xs text-muted-foreground" title="Non ancora valutato">
+        —
+      </span>
+    )
+  }
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span className="font-mono text-sm text-emerald-600" />}>
+        {'$'.repeat(valueScoreToDollars(score))}
+      </TooltipTrigger>
+      <TooltipContent>
+        <div className="text-xs">
+          <div>Valore economico: {project.valueEconomic}/5</div>
+          <div>Opportunità: {project.valueOpportunity}/5</div>
+          <div>Urgenza: {project.valueUrgency}/5</div>
+          <div>Sforzo: {project.valueEffort}/5</div>
+          <div className="mt-1 font-medium">Score: {score.toFixed(1)}</div>
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 export function ProjectsPage() {
   const [data, setData] = useState<ProjectsData | null>(null)
   const [dragId, setDragId] = useState<string | null>(null)
@@ -713,6 +874,10 @@ export function ProjectsPage() {
                   </Badge>
                   {p.name}
                 </AccordionTrigger>
+                <div className="flex items-center gap-1 px-2">
+                  <ProjectValueBadge project={p} />
+                  <ProjectValueDialog project={p} onSaved={load} />
+                </div>
               </AccordionHeader>
               <AccordionPanel>
                 <div className="flex justify-end">

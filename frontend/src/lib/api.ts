@@ -69,6 +69,21 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ order }),
     }),
+  editProject: (
+    id: string,
+    patch: {
+      name: string
+      description?: string
+      valueEconomic?: number
+      valueOpportunity?: number
+      valueUrgency?: number
+      valueEffort?: number
+    }
+  ) =>
+    request<{ ok: true; project: Project }>(`/api/projects/${id}/edit`, {
+      method: 'POST',
+      body: JSON.stringify(patch),
+    }),
 
   objectives: (projectId: string) =>
     request<{ objectives: import('./types').ObjectiveWithSteps[] }>(`/api/objectives?projectId=${projectId}`),
