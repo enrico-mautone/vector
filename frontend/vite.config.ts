@@ -11,6 +11,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // Output in ../public (root del repo): su Vercel i file statici vanno
+  // serviti da lì (express.static() viene ignorato in produzione), e
+  // localmente il server Express li legge comunque dallo stesso posto.
+  build: {
+    outDir: path.resolve(__dirname, '../public'),
+    emptyOutDir: true,
+  },
   server: {
     proxy: {
       '/api': 'http://localhost:3000',

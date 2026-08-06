@@ -6,7 +6,10 @@ const db = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const FRONTEND_DIST = path.join(__dirname, '..', 'frontend', 'dist');
+// Il frontend buildato vive in public/ (root del repo), non in frontend/dist:
+// su Vercel express.static() viene ignorato e solo public/** è servito dalla
+// CDN, quindi il build deve finire lì anche per l'uso locale (vite.config.ts).
+const FRONTEND_DIST = path.join(__dirname, '..', 'public');
 
 app.use(express.json());
 
