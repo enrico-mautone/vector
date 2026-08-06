@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Accordion, AccordionHeader, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Dialog,
@@ -602,12 +602,19 @@ export function ProjectsPage() {
   const [objDragId, setObjDragId] = useState<string | null>(null)
   const [objDragOverId, setObjDragOverId] = useState<string | null>(null)
   const [openOverrides, setOpenOverrides] = useState<Record<string, boolean>>({})
+  const [openProjectId, setOpenProjectId] = useState<string | undefined>(undefined)
 
   function load() {
     api.projects().then(setData).catch(() => toast.error('Non riesco a caricare Progetti.'))
   }
 
   useEffect(load, [])
+
+  useEffect(() => {
+    if (data && openProjectId === undefined) {
+      setOpenProjectId(data.projects[0]?.id)
+    }
+  }, [data, openProjectId])
 
   if (!data) return <Skeleton className="h-96 w-full" />
 
@@ -671,12 +678,13 @@ export function ProjectsPage() {
         <AddProjectDialog onAdded={load} />
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue={data.projects[0]?.id}>
-          <TabsList>
-            {data.projects.map((p) => (
-              <TabsTrigger
-                key={p.id}
-                value={p.id}
+        <Accordion
+          value={openProjectId ? [openProjectId] : []}
+          onValueChange={(value) => setOpenProjectId(value[0] as string | undefined)}
+        >
+          {data.projects.map((p) => (
+            <AccordionItem key={p.id} value={p.id}>
+              <AccordionHeader
                 draggable
                 onDragStart={() => setDragId(p.id)}
                 onDragEnd={() => {
@@ -692,62 +700,62 @@ export function ProjectsPage() {
                   e.preventDefault()
                   handleDrop(p.id)
                 }}
-                className={`gap-1.5 cursor-grab ${dragId === p.id ? 'opacity-40' : ''} ${
-                  dragOverId === p.id ? 'border-l-2 border-l-primary' : ''
+                className={`cursor-grab ${dragId === p.id ? 'opacity-40' : ''} ${
+                  dragOverId === p.id ? 'border-t-2 border-t-primary' : ''
                 }`}
               >
-                <GripVertical className="size-3.5 shrink-0 text-muted-foreground" />
-                <Badge variant="outline" className="font-mono">
-                  {p.priority}
-                </Badge>
-                {p.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {data.projects.map((p) => (
-            <TabsContent key={p.id} value={p.id} className="flex flex-col gap-4">
-              <div className="flex justify-end">
-                <AddObjectiveDialog projectId={p.id} onAdded={load} />
-              </div>
-              {p.objectives.length === 0 && (
-                <p className="text-sm text-muted-foreground">Nessun obiettivo ancora. Aggiungine uno per iniziare.</p>
-              )}
-              {p.objectives.map((o) => {
-                const queued = !o.active && !o.completed
-                return (
-                  <ObjectiveSection
-                    key={o.id}
-                    objective={o}
-                    projectId={p.id}
-                    onChange={load}
-                    isOpen={openOverrides[o.id] ?? o.active}
-                    onToggleOpen={() =>
-                      setOpenOverrides((prev) => ({ ...prev, [o.id]: !(prev[o.id] ?? o.active) }))
-                    }
-                    draggable={queued}
-                    isDragging={objDragId === o.id}
-                    isDragOver={objDragOverId === o.id}
-                    onDragStart={() => setObjDragId(o.id)}
-                    onDragEnd={() => {
-                      setObjDragId(null)
-                      setObjDragOverId(null)
-                    }}
-                    onDragOver={(e) => {
-                      e.preventDefault()
-                      if (objDragId && objDragId !== o.id) setObjDragOverId(o.id)
-                    }}
-                    onDragLeave={() => setObjDragOverId((cur) => (cur === o.id ? null : cur))}
-                    onDrop={(e) => {
-                      e.preventDefault()
-                      handleObjectiveDrop(p, o.id)
-                    }}
-                    onActivate={queued ? () => handleActivateObjective(p, o.id) : undefined}
-                  />
-                )
-              })}
-            </TabsContent>
+                <AccordionTrigger>
+                  <GripVertical className="size-3.5 shrink-0 text-muted-foreground" />
+                  <Badge variant="outline" className="font-mono">
+                    {p.priority}
+                  </Badge>
+                  {p.name}
+                </AccordionTrigger>
+              </AccordionHeader>
+              <AccordionPanel>
+                <div className="flex justify-end">
+                  <AddObjectiveDialog projectId={p.id} onAdded={load} />
+                </div>
+                {p.objectives.length === 0 && (
+                  <p className="text-sm text-muted-foreground">Nessun obiettivo ancora. Aggiungine uno per iniziare.</p>
+                )}
+                {p.objectives.map((o) => {
+                  const queued = !o.active && !o.completed
+                  return (
+                    <ObjectiveSection
+                      key={o.id}
+                      objective={o}
+                      projectId={p.id}
+                      onChange={load}
+                      isOpen={openOverrides[o.id] ?? o.active}
+                      onToggleOpen={() =>
+                        setOpenOverrides((prev) => ({ ...prev, [o.id]: !(prev[o.id] ?? o.active) }))
+                      }
+                      draggable={queued}
+                      isDragging={objDragId === o.id}
+                      isDragOver={objDragOverId === o.id}
+                      onDragStart={() => setObjDragId(o.id)}
+                      onDragEnd={() => {
+                        setObjDragId(null)
+                        setObjDragOverId(null)
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault()
+                        if (objDragId && objDragId !== o.id) setObjDragOverId(o.id)
+                      }}
+                      onDragLeave={() => setObjDragOverId((cur) => (cur === o.id ? null : cur))}
+                      onDrop={(e) => {
+                        e.preventDefault()
+                        handleObjectiveDrop(p, o.id)
+                      }}
+                      onActivate={queued ? () => handleActivateObjective(p, o.id) : undefined}
+                    />
+                  )
+                })}
+              </AccordionPanel>
+            </AccordionItem>
           ))}
-        </Tabs>
+        </Accordion>
       </CardContent>
     </Card>
   )
