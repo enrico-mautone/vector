@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { Compass, ListChecks, Repeat, Settings } from 'lucide-react'
+import { Compass, ListChecks, LogOut, Repeat, Settings } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { useAuth } from '@/lib/auth'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Oggi', icon: Compass, end: true },
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
 
 export function AppSidebar() {
   const location = useLocation()
+  const { logout } = useAuth()
 
   return (
     <Sidebar collapsible="icon">
@@ -73,6 +75,12 @@ export function AppSidebar() {
             >
               <Settings />
               <span>Impostazioni</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Esci" onClick={logout}>
+              <LogOut />
+              <span>Esci</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

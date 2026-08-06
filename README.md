@@ -17,7 +17,25 @@ in una sessione di terminale già aperta, apri un nuovo terminale (il PATH si
 aggiorna solo per le sessioni nuove).
 
 Serve un file `.env` con `DATABASE_URL=<connection string Postgres>` (vedi
-sezione Dati sotto) — non committato, va creato a mano.
+sezione Dati sotto) e `JWT_SECRET=<stringa casuale lunga>` (vedi sezione
+Login sotto) — non committato, va creato a mano.
+
+## Login
+
+Vector è protetto da login JWT: tutte le `/api/*` (tranne `/api/auth/login`)
+richiedono un `Authorization: Bearer <token>` valido, e il frontend mostra
+solo la pagina di sign-in finché non sei autenticato (`frontend/src/lib/auth.tsx`,
+`src/auth.js`). Non c'è self-signup: gli utenti si creano a mano contro il DB
+con lo script one-off
+
+```bash
+node scripts/create-user.js <email> <password>
+```
+
+che salva solo l'hash bcrypt della password. Il token dura 30 giorni ed è
+firmato con `JWT_SECRET` — la stessa variabile deve essere impostata sia in
+locale (`.env`) sia nelle Environment Variables di Vercel, altrimenti i
+token firmati in un ambiente non sono validi nell'altro.
 
 ## Dati
 
@@ -38,5 +56,5 @@ buildato invece va in `public/` (non `frontend/dist/`) perché su Vercel
 npm run build`, che produce l'output direttamente in `public/` — vedi
 `frontend/vite.config.ts`) e il rewrite SPA (ogni path non-`/api/*` senza
 un file statico corrispondente serve `index.html`, per il routing
-client-side). `DATABASE_URL` va impostata nelle Environment Variables del
-progetto Vercel, non letta da `.env`.
+client-side). `DATABASE_URL` e `JWT_SECRET` vanno impostate nelle Environment
+Variables del progetto Vercel, non lette da `.env`.
