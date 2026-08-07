@@ -171,10 +171,6 @@ function ProjectBacklog({
   const open = steps.filter((s) => !s.done)
   const done = steps.filter((s) => s.done)
 
-  // Contenitore droppable a sé stante: serve per intercettare il drop quando la
-  // lista degli step aperti è vuota (nessun item su cui agganciarsi via SortableContext).
-  const { setNodeRef: setDropZoneRef, isOver } = useDroppable({ id: `dropzone:${objectiveId}`, disabled: readOnly })
-
   async function handleAdd() {
     if (!newStep.trim()) return
     try {
@@ -262,7 +258,7 @@ function ProjectBacklog({
         </div>
       )}
 
-      <div ref={setDropZoneRef} className={`flex flex-col gap-2 rounded-md ${isOver ? 'bg-accent/40' : ''}`}>
+      <div className="flex flex-col gap-2 rounded-md">
         {open.length === 0 && (
           <p className="text-sm text-muted-foreground">Nessuno step aperto. Trascina qui uno step da un altro obiettivo.</p>
         )}
@@ -477,7 +473,18 @@ function ObjectiveSection({
     id: `obj:${objective.id}`,
     disabled: !queued,
   })
+  // Droppable a livello di intera card obiettivo (non solo della lista step aperti):
+  // così un drop funziona anche quando l'obiettivo di destinazione è chiuso/collassato,
+  // non solo quando è espanso e la lista step è visibile.
+  const { setNodeRef: setDropZoneRef, isOver } = useDroppable({
+    id: `dropzone:${objective.id}`,
+    disabled: objective.completed,
+  })
   const style = { transform: CSS.Transform.toString(transform), transition }
+  function setRefs(node: HTMLDivElement | null) {
+    setNodeRef(node)
+    setDropZoneRef(node)
+  }
 
   async function handleFinish() {
     setPending(true)
@@ -495,11 +502,11 @@ function ObjectiveSection({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={setRefs}
       style={style}
       className={`flex flex-col gap-3 rounded-lg border p-4 ${objective.completed ? 'opacity-60' : ''} ${!objective.active && !objective.completed ? 'opacity-70' : ''} ${
         isDragging ? 'opacity-40' : ''
-      }`}
+      } ${isOver ? 'ring-2 ring-primary/40' : ''}`}
     >
       <div className="flex items-start justify-between gap-2">
         {queued && (
