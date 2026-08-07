@@ -1,6 +1,18 @@
-import { useEffect, useRef, useState, type DragEvent } from 'react'
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { toast } from 'sonner'
 import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, GripVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type CollisionDetection,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { api } from '@/lib/api'
 import type { Project, ProjectsData, Step } from '@/lib/types'
 import { computeValueScore, formatObjective, valueScoreToDollars } from '@/lib/utils'
@@ -35,6 +47,109 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 
+// Un singolo step trascinabile. L'handle di trascinamento (icona grip) è l'unico
+// elemento con i listener di drag: il resto della riga (bottoni edit/sposta/elimina)
+// resta cliccabile senza conflitti con il gesto di drag.
+function SortableStepRow({
+  step,
+  index,
+  total,
+  readOnly,
+  editingId,
+  editText,
+  setEditText,
+  startEdit,
+  saveEdit,
+  cancelEdit,
+  handleMove,
+  handleDelete,
+}: {
+  step: Step
+  index: number
+  total: number
+  readOnly: boolean
+  editingId: string | null
+  editText: string
+  setEditText: (v: string) => void
+  startEdit: (s: Step) => void
+  saveEdit: (id: string) => void
+  cancelEdit: () => void
+  handleMove: (index: number, direction: -1 | 1) => void
+  handleDelete: (id: string) => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: `step:${step.id}`,
+    disabled: readOnly,
+  })
+  const style = { transform: CSS.Transform.toString(transform), transition }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 rounded-md border px-3 py-2 ${isDragging ? 'opacity-40' : ''}`}
+    >
+      {!readOnly && (
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="shrink-0 cursor-grab touch-none text-muted-foreground"
+          aria-label="Trascina per riordinare"
+        >
+          <GripVertical className="size-3.5" />
+        </button>
+      )}
+      {editingId === step.id ? (
+        <>
+          <Input
+            autoFocus
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveEdit(step.id)
+              if (e.key === 'Escape') cancelEdit()
+            }}
+            className="h-7 flex-1"
+          />
+          <Button variant="ghost" size="icon" className="size-7" onClick={() => saveEdit(step.id)}>
+            <Check className="size-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="size-7" onClick={cancelEdit}>
+            <X className="size-3.5" />
+          </Button>
+        </>
+      ) : (
+        <>
+          <span className="flex-1 text-sm">{step.text}</span>
+          {!readOnly && (
+            <>
+              <Button variant="ghost" size="icon" className="size-7" onClick={() => startEdit(step)}>
+                <Pencil className="size-3.5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="size-7" disabled={index === 0} onClick={() => handleMove(index, -1)}>
+                <ArrowUp className="size-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7"
+                disabled={index === total - 1}
+                onClick={() => handleMove(index, 1)}
+              >
+                <ArrowDown className="size-3.5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="size-7" onClick={() => handleDelete(step.id)}>
+                <Trash2 className="size-3.5" />
+              </Button>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 function ProjectBacklog({
   steps,
   projectId,
@@ -50,14 +165,17 @@ function ProjectBacklog({
 }) {
   const [newStep, setNewStep] = useState('')
   const [bulkText, setBulkText] = useState('')
-  const [dragId, setDragId] = useState<string | null>(null)
-  const [dragOverId, setDragOverId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
   const [completedOpen, setCompletedOpen] = useState(false)
 
   const open = steps.filter((s) => !s.done)
   const done = steps.filter((s) => s.done)
+
+  // Dropzone specifica per la lista degli step aperti (attiva solo qui, il backlog
+  // è montato solo quando l'obiettivo è espanso — vedi il dropzone gemello, disabilitato
+  // in questo caso, sulla card di ObjectiveSection per il caso "obiettivo chiuso").
+  const { setNodeRef: setDropZoneRef, isOver } = useDroppable({ id: `dropzone:${objectiveId}`, disabled: readOnly })
 
   async function handleAdd() {
     if (!newStep.trim()) return
@@ -130,35 +248,6 @@ function ProjectBacklog({
     }
   }
 
-  // targetId=null significa "rilascia in fondo alla lista" (drop sul contenitore,
-  // non su un item specifico). Legge dataTransfer per gestire anche il drop di
-  // uno step trascinato da un ALTRO obiettivo (dragId locale non lo conosce).
-  async function handleDrop(targetId: string | null, e: DragEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragOverId(null)
-    let payload: { stepId: string; objectiveId: string } | null = null
-    try {
-      const raw = e.dataTransfer.getData('application/x-step')
-      payload = raw ? JSON.parse(raw) : null
-    } catch {
-      payload = null
-    }
-    const stepId = payload?.stepId ?? dragId
-    const sourceObjectiveId = payload?.objectiveId ?? objectiveId
-    setDragId(null)
-    if (!stepId || stepId === targetId) return
-
-    if (sourceObjectiveId !== objectiveId) {
-      await api.moveStep(stepId, objectiveId)
-    }
-    const order = open.map((s) => s.id).filter((id) => id !== stepId)
-    const toIndex = targetId ? order.indexOf(targetId) : order.length
-    order.splice(toIndex === -1 ? order.length : toIndex, 0, stepId)
-    await api.reorderSteps(projectId, order.concat(done.map((s) => s.id)))
-    onChange()
-  }
-
   return (
     <div className="flex flex-col gap-4">
       {!readOnly && (
@@ -175,95 +264,29 @@ function ProjectBacklog({
         </div>
       )}
 
-      <div
-        className="flex flex-col gap-2"
-        onDragOver={(e) => {
-          if (readOnly) return
-          e.preventDefault()
-        }}
-        onDrop={(e) => {
-          if (readOnly) return
-          handleDrop(null, e)
-        }}
-      >
-        {open.length === 0 && <p className="text-sm text-muted-foreground">Nessuno step aperto. Trascina qui uno step da un altro obiettivo.</p>}
-        {open.map((s, i) => (
-          <div
-            key={s.id}
-            draggable={!readOnly}
-            onDragStart={(e) => {
-              if (readOnly) return
-              setDragId(s.id)
-              e.dataTransfer.setData('application/x-step', JSON.stringify({ stepId: s.id, objectiveId }))
-            }}
-            onDragEnd={() => {
-              setDragId(null)
-              setDragOverId(null)
-            }}
-            onDragOver={(e) => {
-              if (readOnly) return
-              e.preventDefault()
-              e.stopPropagation()
-              if (dragId !== s.id) setDragOverId(s.id)
-            }}
-            onDragLeave={() => setDragOverId((cur) => (cur === s.id ? null : cur))}
-            onDrop={(e) => {
-              if (readOnly) return
-              handleDrop(s.id, e)
-            }}
-            className={`flex items-center gap-2 rounded-md border px-3 py-2 ${dragId === s.id ? 'opacity-40' : ''} ${
-              dragOverId === s.id ? 'border-t-2 border-t-primary' : ''
-            }`}
-          >
-            {!readOnly && <GripVertical className="size-3.5 shrink-0 cursor-grab text-muted-foreground" />}
-            {editingId === s.id ? (
-              <>
-                <Input
-                  autoFocus
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') saveEdit(s.id)
-                    if (e.key === 'Escape') cancelEdit()
-                  }}
-                  className="h-7 flex-1"
-                />
-                <Button variant="ghost" size="icon" className="size-7" onClick={() => saveEdit(s.id)}>
-                  <Check className="size-3.5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="size-7" onClick={cancelEdit}>
-                  <X className="size-3.5" />
-                </Button>
-              </>
-            ) : (
-              <>
-                <span className="flex-1 text-sm">{s.text}</span>
-                {!readOnly && (
-                  <>
-                    <Button variant="ghost" size="icon" className="size-7" onClick={() => startEdit(s)}>
-                      <Pencil className="size-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="size-7" disabled={i === 0} onClick={() => handleMove(i, -1)}>
-                      <ArrowUp className="size-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-7"
-                      disabled={i === open.length - 1}
-                      onClick={() => handleMove(i, 1)}
-                    >
-                      <ArrowDown className="size-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="size-7" onClick={() => handleDelete(s.id)}>
-                      <Trash2 className="size-3.5" />
-                    </Button>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        ))}
+      <div ref={setDropZoneRef} className={`flex flex-col gap-2 rounded-md ${isOver ? 'bg-accent/40' : ''}`}>
+        {open.length === 0 && (
+          <p className="text-sm text-muted-foreground">Nessuno step aperto. Trascina qui uno step da un altro obiettivo.</p>
+        )}
+        <SortableContext items={open.map((s) => `step:${s.id}`)} strategy={verticalListSortingStrategy}>
+          {open.map((s, i) => (
+            <SortableStepRow
+              key={s.id}
+              step={s}
+              index={i}
+              total={open.length}
+              readOnly={readOnly}
+              editingId={editingId}
+              editText={editText}
+              setEditText={setEditText}
+              startEdit={startEdit}
+              saveEdit={saveEdit}
+              cancelEdit={cancelEdit}
+              handleMove={handleMove}
+              handleDelete={handleDelete}
+            />
+          ))}
+        </SortableContext>
       </div>
 
       {done.length > 0 && (
@@ -427,20 +450,16 @@ function EditObjectiveDialog({
   )
 }
 
+// Un obiettivo in coda si può trascinare per riordinarlo (handle dedicato, come
+// per gli step); obiettivi attivi/completati restano fermi ma sono comunque
+// validi bersagli di drop per far scorrere gli altri intorno a loro.
 function ObjectiveSection({
   objective,
   projectId,
   onChange,
   isOpen,
   onToggleOpen,
-  draggable = false,
-  isDragging = false,
-  isDragOver = false,
-  onDragStart,
-  onDragEnd,
-  onDragOver,
-  onDragLeave,
-  onDrop,
+  queued,
   onActivate,
 }: {
   objective: ProjectsData['projects'][number]['objectives'][number]
@@ -448,20 +467,33 @@ function ObjectiveSection({
   onChange: () => void
   isOpen: boolean
   onToggleOpen: () => void
-  draggable?: boolean
-  isDragging?: boolean
-  isDragOver?: boolean
-  onDragStart?: () => void
-  onDragEnd?: () => void
-  onDragOver?: (e: DragEvent) => void
-  onDragLeave?: () => void
-  onDrop?: (e: DragEvent) => void
+  queued: boolean
   onActivate?: () => void
 }) {
   const [confirmFinish, setConfirmFinish] = useState(false)
   const [pending, setPending] = useState(false)
   const hasOpenStep = objective.steps.some((s) => !s.done)
   const canFinish = objective.active && !hasOpenStep && objective.steps.length > 0
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: `obj:${objective.id}`,
+    disabled: !queued,
+  })
+  // Droppable di fallback a livello di intera card, attivo SOLO quando l'obiettivo è
+  // chiuso/collassato (quando è aperto usa invece il dropzone dedicato dentro
+  // ProjectBacklog, sulla lista step — vedi "dropzone:"). Id diverso ("objdrop:") per
+  // evitare che due nodi diversi si registrino con lo stesso id in dnd-kit; se
+  // condividessero l'id, la card intera "vincerebbe" spesso il closestCenter anche
+  // sulle singole righe step, rompendo il riordino interno alla lista.
+  const { setNodeRef: setDropZoneRef, isOver } = useDroppable({
+    id: `objdrop:${objective.id}`,
+    disabled: objective.completed || isOpen,
+  })
+  const style = { transform: CSS.Transform.toString(transform), transition }
+  function setRefs(node: HTMLDivElement | null) {
+    setNodeRef(node)
+    setDropZoneRef(node)
+  }
 
   async function handleFinish() {
     setPending(true)
@@ -479,17 +511,24 @@ function ObjectiveSection({
 
   return (
     <div
-      draggable={draggable}
-      onDragStart={draggable ? onDragStart : undefined}
-      onDragEnd={draggable ? onDragEnd : undefined}
-      onDragOver={draggable ? onDragOver : undefined}
-      onDragLeave={draggable ? onDragLeave : undefined}
-      onDrop={draggable ? onDrop : undefined}
+      ref={setRefs}
+      style={style}
       className={`flex flex-col gap-3 rounded-lg border p-4 ${objective.completed ? 'opacity-60' : ''} ${!objective.active && !objective.completed ? 'opacity-70' : ''} ${
-        draggable && isDragging ? 'opacity-40' : ''
-      } ${draggable && isDragOver ? 'border-t-2 border-t-primary' : ''}`}
+        isDragging ? 'opacity-40' : ''
+      } ${isOver ? 'ring-2 ring-primary/40' : ''}`}
     >
       <div className="flex items-start justify-between gap-2">
+        {queued && (
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="mt-0.5 shrink-0 cursor-grab touch-none text-muted-foreground"
+            aria-label="Trascina per riordinare"
+          >
+            <GripVertical className="size-4" />
+          </button>
+        )}
         <button
           type="button"
           onClick={onToggleOpen}
@@ -749,15 +788,201 @@ function ProjectValueDialog({ project, onSaved }: { project: Project; onSaved: (
   )
 }
 
+// Un obiettivo "in coda" (queued) e collassato ha ENTRAMBI gli hook attivi sulla
+// stessa card (vedi setRefs in ObjectiveSection): useSortable("obj:<id>", che
+// registra internamente anche una propria droppable implicita con lo stesso id)
+// e il nostro useDroppable("objdrop:<id>") esplicito per il drop di step. Stesso
+// nodo DOM, due droppable quasi sovrapposti: durante il drag di uno STEP,
+// closestCenter() può risolvere "over" sulla droppable implicita "obj:<id>"
+// invece che su "objdrop:<id>" (nessuno dei due prefissi noti a handleDragEnd
+// per uno step drag), quindi il drop su un obiettivo in coda e collassato
+// falliva silenziosamente. Fix: una collisionDetection su misura che, in base al
+// prefisso dell'id trascinato, esclude a priori i droppable dell'altro "mondo"
+// (step vs obiettivo) invece di lasciare che closestCenter scelga fra
+// candidati ambigui sullo stesso nodo.
+const stepPrefixes = ['step:', 'dropzone:', 'objdrop:']
+const objectiveAwareCollisionDetection: CollisionDetection = (args) => {
+  const activeId = String(args.active.id)
+  const allowed = activeId.startsWith('step:') ? stepPrefixes : activeId.startsWith('obj:') ? ['obj:'] : null
+  if (!allowed) return closestCenter(args)
+  return closestCenter({
+    ...args,
+    droppableContainers: args.droppableContainers.filter((c) => allowed.some((p) => String(c.id).startsWith(p))),
+  })
+}
+
+// Un unico DndContext per progetto copre sia il riordino degli obiettivi (drag
+// sull'handle dell'obiettivo) sia il riordino/spostamento degli step fra
+// obiettivi diversi dello stesso progetto (drag sull'handle dello step). I due
+// casi si distinguono dal prefisso dell'id ("obj:"/"step:"/"dropzone:"/"objdrop:"),
+// quindi un solo onDragEnd basta e non serve nidificare più DndContext.
+function ObjectivesBoard({
+  project,
+  onChange,
+  openOverrides,
+  setOpenOverrides,
+}: {
+  project: ProjectsData['projects'][number]
+  onChange: () => void
+  openOverrides: Record<string, boolean>
+  setOpenOverrides: Dispatch<SetStateAction<Record<string, boolean>>>
+}) {
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
+
+  async function handleActivateObjective(objectiveId: string) {
+    const order = project.objectives.map((o) => o.id)
+    const index = order.indexOf(objectiveId)
+    if (index === -1) return
+    order.splice(index, 1)
+    order.unshift(objectiveId)
+    try {
+      await api.reorderObjectives(project.id, order)
+      onChange()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Non riesco ad attivare questo obiettivo.')
+    }
+  }
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over) return
+    const activeId = String(active.id)
+    const overId = String(over.id)
+    if (activeId === overId) return
+
+    if (activeId.startsWith('obj:')) {
+      if (!overId.startsWith('obj:')) return
+      const order = project.objectives.map((o) => `obj:${o.id}`)
+      const fromIndex = order.indexOf(activeId)
+      const toIndex = order.indexOf(overId)
+      if (fromIndex === -1 || toIndex === -1) return
+      const next = arrayMove(order, fromIndex, toIndex).map((id) => id.slice(4))
+      try {
+        await api.reorderObjectives(project.id, next)
+        onChange()
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Non riesco a riordinare gli obiettivi.')
+      }
+      return
+    }
+
+    if (!activeId.startsWith('step:')) return
+    const stepId = activeId.slice(5)
+    const sourceObjective = project.objectives.find((o) => o.steps.some((s) => s.id === stepId && !s.done))
+    if (!sourceObjective) return
+
+    let targetObjectiveId: string | null = null
+    let overStepId: string | null = null
+    if (overId.startsWith('dropzone:')) {
+      targetObjectiveId = overId.slice(9)
+    } else if (overId.startsWith('objdrop:')) {
+      targetObjectiveId = overId.slice(8)
+    } else if (overId.startsWith('step:')) {
+      overStepId = overId.slice(5)
+      targetObjectiveId = project.objectives.find((o) => o.steps.some((s) => s.id === overStepId && !s.done))?.id ?? null
+    }
+    if (!targetObjectiveId) return
+
+    try {
+      if (sourceObjective.id !== targetObjectiveId) {
+        await api.moveStep(stepId, targetObjectiveId)
+      }
+      const targetObjective = project.objectives.find((o) => o.id === targetObjectiveId)!
+      const openIds = targetObjective.steps.filter((s) => !s.done && s.id !== stepId).map((s) => s.id)
+      const doneIds = targetObjective.steps.filter((s) => s.done).map((s) => s.id)
+      const toIndex = overStepId ? openIds.indexOf(overStepId) : openIds.length
+      openIds.splice(toIndex === -1 ? openIds.length : toIndex, 0, stepId)
+      await api.reorderSteps(project.id, openIds.concat(doneIds))
+      onChange()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Non riesco a riordinare gli step.')
+    }
+  }
+
+  return (
+    <DndContext sensors={sensors} collisionDetection={objectiveAwareCollisionDetection} onDragEnd={handleDragEnd}>
+      <div className="flex justify-end">
+        <AddObjectiveDialog projectId={project.id} onAdded={onChange} />
+      </div>
+      {project.objectives.length === 0 && (
+        <p className="text-sm text-muted-foreground">Nessun obiettivo ancora. Aggiungine uno per iniziare.</p>
+      )}
+      <SortableContext items={project.objectives.map((o) => `obj:${o.id}`)} strategy={verticalListSortingStrategy}>
+        {project.objectives.map((o) => {
+          const queued = !o.active && !o.completed
+          return (
+            <ObjectiveSection
+              key={o.id}
+              objective={o}
+              projectId={project.id}
+              onChange={onChange}
+              isOpen={openOverrides[o.id] ?? o.active}
+              onToggleOpen={() =>
+                setOpenOverrides((prev) => ({ ...prev, [o.id]: !(prev[o.id] ?? o.active) }))
+              }
+              queued={queued}
+              onActivate={queued ? () => handleActivateObjective(o.id) : undefined}
+            />
+          )
+        })}
+      </SortableContext>
+    </DndContext>
+  )
+}
+
+// Riga di progetto trascinabile: solo l'icona grip ha i listener di drag, così
+// il click sul trigger dell'accordion (per aprire/chiudere) e sui bottoni non
+// entra in conflitto col gesto di trascinamento.
+function SortableProjectItem({
+  project,
+  onChange,
+  openOverrides,
+  setOpenOverrides,
+}: {
+  project: ProjectsData['projects'][number]
+  onChange: () => void
+  openOverrides: Record<string, boolean>
+  setOpenOverrides: Dispatch<SetStateAction<Record<string, boolean>>>
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: project.id })
+  const style = { transform: CSS.Transform.toString(transform), transition }
+
+  return (
+    <AccordionItem ref={setNodeRef} style={style} value={project.id} className={isDragging ? 'opacity-40' : ''}>
+      <AccordionHeader>
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="flex items-center px-2 cursor-grab touch-none text-muted-foreground"
+          aria-label="Trascina per riordinare"
+        >
+          <GripVertical className="size-3.5" />
+        </button>
+        <AccordionTrigger>
+          <Badge variant="outline" className="font-mono">
+            {project.priority}
+          </Badge>
+          {project.name}
+        </AccordionTrigger>
+        <div className="flex items-center gap-1 px-2">
+          <ProjectValueBadge project={project} />
+          <ProjectValueDialog project={project} onSaved={onChange} />
+        </div>
+      </AccordionHeader>
+      <AccordionPanel>
+        <ObjectivesBoard project={project} onChange={onChange} openOverrides={openOverrides} setOpenOverrides={setOpenOverrides} />
+      </AccordionPanel>
+    </AccordionItem>
+  )
+}
+
 export function ProjectsPage() {
   const [data, setData] = useState<ProjectsData | null>(null)
-  const [dragId, setDragId] = useState<string | null>(null)
-  const [dragOverId, setDragOverId] = useState<string | null>(null)
-  const [objDragId, setObjDragId] = useState<string | null>(null)
-  const [objDragOverId, setObjDragOverId] = useState<string | null>(null)
   const [openOverrides, setOpenOverrides] = useState<Record<string, boolean>>({})
   const [openProjectId, setOpenProjectId] = useState<string | undefined>(undefined)
   const didInitOpenProject = useRef(false)
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
 
   function load() {
     api.projects().then(setData).catch(() => toast.error('Non riesco a caricare Progetti.'))
@@ -774,54 +999,20 @@ export function ProjectsPage() {
 
   if (!data) return <Skeleton className="h-96 w-full" />
 
-  async function handleDrop(targetId: string) {
-    setDragOverId(null)
-    if (!data || !dragId || dragId === targetId) {
-      setDragId(null)
-      return
-    }
+  async function handleProjectDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!data || !over || active.id === over.id) return
     const order = data.projects.map((p) => p.id)
-    const fromIndex = order.indexOf(dragId)
-    const toIndex = order.indexOf(targetId)
-    if (fromIndex === -1 || toIndex === -1) {
-      setDragId(null)
-      return
+    const fromIndex = order.indexOf(String(active.id))
+    const toIndex = order.indexOf(String(over.id))
+    if (fromIndex === -1 || toIndex === -1) return
+    const next = arrayMove(order, fromIndex, toIndex)
+    try {
+      await api.reorderProjects(next)
+      load()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Non riesco a riordinare i progetti.')
     }
-    order.splice(fromIndex, 1)
-    order.splice(toIndex, 0, dragId)
-    setDragId(null)
-    await api.reorderProjects(order)
-    load()
-  }
-
-  async function handleObjectiveDrop(project: ProjectsData['projects'][number], targetId: string) {
-    setObjDragOverId(null)
-    if (!objDragId || objDragId === targetId) {
-      setObjDragId(null)
-      return
-    }
-    const order = project.objectives.map((o) => o.id)
-    const fromIndex = order.indexOf(objDragId)
-    const toIndex = order.indexOf(targetId)
-    if (fromIndex === -1 || toIndex === -1) {
-      setObjDragId(null)
-      return
-    }
-    order.splice(fromIndex, 1)
-    order.splice(toIndex, 0, objDragId)
-    setObjDragId(null)
-    await api.reorderObjectives(project.id, order)
-    load()
-  }
-
-  async function handleActivateObjective(project: ProjectsData['projects'][number], objectiveId: string) {
-    const order = project.objectives.map((o) => o.id)
-    const index = order.indexOf(objectiveId)
-    if (index === -1) return
-    order.splice(index, 1)
-    order.unshift(objectiveId)
-    await api.reorderObjectives(project.id, order)
-    load()
   }
 
   return (
@@ -834,88 +1025,24 @@ export function ProjectsPage() {
         <AddProjectDialog onAdded={load} />
       </CardHeader>
       <CardContent>
-        <Accordion
-          value={openProjectId ? [openProjectId] : []}
-          onValueChange={(value) => setOpenProjectId(value[0] ?? undefined)}
-        >
-          {data.projects.map((p) => (
-            <AccordionItem key={p.id} value={p.id}>
-              <AccordionHeader
-                draggable
-                onDragStart={() => setDragId(p.id)}
-                onDragEnd={() => {
-                  setDragId(null)
-                  setDragOverId(null)
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault()
-                  if (dragId && dragId !== p.id) setDragOverId(p.id)
-                }}
-                onDragLeave={() => setDragOverId((cur) => (cur === p.id ? null : cur))}
-                onDrop={(e) => {
-                  e.preventDefault()
-                  handleDrop(p.id)
-                }}
-                className={`${dragId === p.id ? 'opacity-40' : ''} ${
-                  dragOverId === p.id ? 'border-t-2 border-t-primary' : ''
-                }`}
-              >
-                <AccordionTrigger className="cursor-grab">
-                  <GripVertical className="size-3.5 shrink-0 text-muted-foreground" />
-                  <Badge variant="outline" className="font-mono">
-                    {p.priority}
-                  </Badge>
-                  {p.name}
-                </AccordionTrigger>
-                <div className="flex items-center gap-1 px-2">
-                  <ProjectValueBadge project={p} />
-                  <ProjectValueDialog project={p} onSaved={load} />
-                </div>
-              </AccordionHeader>
-              <AccordionPanel>
-                <div className="flex justify-end">
-                  <AddObjectiveDialog projectId={p.id} onAdded={load} />
-                </div>
-                {p.objectives.length === 0 && (
-                  <p className="text-sm text-muted-foreground">Nessun obiettivo ancora. Aggiungine uno per iniziare.</p>
-                )}
-                {p.objectives.map((o) => {
-                  const queued = !o.active && !o.completed
-                  return (
-                    <ObjectiveSection
-                      key={o.id}
-                      objective={o}
-                      projectId={p.id}
-                      onChange={load}
-                      isOpen={openOverrides[o.id] ?? o.active}
-                      onToggleOpen={() =>
-                        setOpenOverrides((prev) => ({ ...prev, [o.id]: !(prev[o.id] ?? o.active) }))
-                      }
-                      draggable={queued}
-                      isDragging={objDragId === o.id}
-                      isDragOver={objDragOverId === o.id}
-                      onDragStart={() => setObjDragId(o.id)}
-                      onDragEnd={() => {
-                        setObjDragId(null)
-                        setObjDragOverId(null)
-                      }}
-                      onDragOver={(e) => {
-                        e.preventDefault()
-                        if (objDragId && objDragId !== o.id) setObjDragOverId(o.id)
-                      }}
-                      onDragLeave={() => setObjDragOverId((cur) => (cur === o.id ? null : cur))}
-                      onDrop={(e) => {
-                        e.preventDefault()
-                        handleObjectiveDrop(p, o.id)
-                      }}
-                      onActivate={queued ? () => handleActivateObjective(p, o.id) : undefined}
-                    />
-                  )
-                })}
-              </AccordionPanel>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleProjectDragEnd}>
+          <SortableContext items={data.projects.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+            <Accordion
+              value={openProjectId ? [openProjectId] : []}
+              onValueChange={(value) => setOpenProjectId(value[0] ?? undefined)}
+            >
+              {data.projects.map((p) => (
+                <SortableProjectItem
+                  key={p.id}
+                  project={p}
+                  onChange={load}
+                  openOverrides={openOverrides}
+                  setOpenOverrides={setOpenOverrides}
+                />
+              ))}
+            </Accordion>
+          </SortableContext>
+        </DndContext>
       </CardContent>
     </Card>
   )

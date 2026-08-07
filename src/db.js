@@ -75,7 +75,8 @@ async function initSchema() {
       text text NOT NULL,
       done boolean NOT NULL DEFAULT false,
       completed_at timestamptz,
-      created_at timestamptz NOT NULL
+      created_at timestamptz NOT NULL,
+      position integer
     );
     CREATE TABLE IF NOT EXISTS habits (
       id text PRIMARY KEY,
@@ -99,6 +100,21 @@ async function initSchema() {
       password_hash text NOT NULL,
       created_at timestamptz NOT NULL DEFAULT now()
     );
+  `);
+  // steps.position: colonna aggiunta dopo la creazione iniziale della tabella,
+  // "CREATE TABLE IF NOT EXISTS" sopra non la aggiunge su un DB già esistente.
+  // Senza una colonna d'ordine esplicita, l'ordine restituito da "SELECT * FROM
+  // steps" dipende dall'ordine fisico delle righe: un upsert (ON CONFLICT DO
+  // UPDATE, il caso normale di un riordino) aggiorna i valori in-place senza
+  // spostare la riga, quindi il drag&drop non veniva mai persistito davvero.
+  await pool.query(`ALTER TABLE steps ADD COLUMN IF NOT EXISTS position integer;`);
+  // Backfill una tantum per le righe esistenti senza position: usa l'ordine di
+  // creazione come punto di partenza (nessuna informazione di ordine migliore
+  // disponibile per righe scritte prima di questa colonna).
+  await pool.query(`
+    UPDATE steps SET position = sub.rn
+    FROM (SELECT id, row_number() OVER (ORDER BY created_at) AS rn FROM steps) sub
+    WHERE steps.id = sub.id AND steps.position IS NULL;
   `);
 }
 
@@ -252,7 +268,10 @@ function stepRowToJs(r) {
 }
 
 async function readSteps() {
-  const res = await pool.query('SELECT * FROM steps');
+  // position determina l'ordine "vero" (vedi commento su ALTER TABLE in
+  // initSchema); NULLS LAST + created_at come fallback per righe non ancora
+  // backfillate.
+  const res = await pool.query('SELECT * FROM steps ORDER BY position ASC NULLS LAST, created_at ASC');
   return res.rows.map(stepRowToJs);
 }
 
@@ -266,11 +285,16 @@ async function writeSteps(steps) {
       const ids = steps.map((s) => s.id);
       await client.query('DELETE FROM steps WHERE id != ALL($1::text[])', [ids]);
       if (steps.length > 0) {
+        // position = indice nell'array ricevuto: chi chiama writeSteps passa
+        // sempre l'ordine desiderato (letto da readSteps e poi riscritto, o
+        // ricalcolato esplicitamente da /api/steps/reorder), quindi persistere
+        // l'indice come colonna esplicita è sufficiente e si autocorregge ad
+        // ogni scrittura successiva.
         const { placeholders, values } = buildValuesClause(
-          steps.map((s) => [s.id, s.projectId, s.objectiveId ?? null, s.text, !!s.done, s.completedAt ?? null, s.createdAt])
+          steps.map((s, i) => [s.id, s.projectId, s.objectiveId ?? null, s.text, !!s.done, s.completedAt ?? null, s.createdAt, i])
         );
         await client.query(
-          `INSERT INTO steps (id, project_id, objective_id, text, done, completed_at, created_at)
+          `INSERT INTO steps (id, project_id, objective_id, text, done, completed_at, created_at, position)
            VALUES ${placeholders}
            ON CONFLICT (id) DO UPDATE SET
              project_id = EXCLUDED.project_id,
@@ -278,7 +302,8 @@ async function writeSteps(steps) {
              text = EXCLUDED.text,
              done = EXCLUDED.done,
              completed_at = EXCLUDED.completed_at,
-             created_at = EXCLUDED.created_at`,
+             created_at = EXCLUDED.created_at,
+             position = EXCLUDED.position`,
           values
         );
       }
