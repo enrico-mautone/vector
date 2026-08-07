@@ -171,6 +171,11 @@ function ProjectBacklog({
   const open = steps.filter((s) => !s.done)
   const done = steps.filter((s) => s.done)
 
+  // Dropzone specifica per la lista degli step aperti (attiva solo qui, il backlog
+  // è montato solo quando l'obiettivo è espanso — vedi il dropzone gemello, disabilitato
+  // in questo caso, sulla card di ObjectiveSection per il caso "obiettivo chiuso").
+  const { setNodeRef: setDropZoneRef, isOver } = useDroppable({ id: `dropzone:${objectiveId}`, disabled: readOnly })
+
   async function handleAdd() {
     if (!newStep.trim()) return
     try {
@@ -258,7 +263,7 @@ function ProjectBacklog({
         </div>
       )}
 
-      <div className="flex flex-col gap-2 rounded-md">
+      <div ref={setDropZoneRef} className={`flex flex-col gap-2 rounded-md ${isOver ? 'bg-accent/40' : ''}`}>
         {open.length === 0 && (
           <p className="text-sm text-muted-foreground">Nessuno step aperto. Trascina qui uno step da un altro obiettivo.</p>
         )}
@@ -473,12 +478,15 @@ function ObjectiveSection({
     id: `obj:${objective.id}`,
     disabled: !queued,
   })
-  // Droppable a livello di intera card obiettivo (non solo della lista step aperti):
-  // così un drop funziona anche quando l'obiettivo di destinazione è chiuso/collassato,
-  // non solo quando è espanso e la lista step è visibile.
+  // Droppable di fallback a livello di intera card, attivo SOLO quando l'obiettivo è
+  // chiuso/collassato (quando è aperto usa invece il dropzone dedicato dentro
+  // ProjectBacklog, sulla lista step — vedi "dropzone:"). Id diverso ("objdrop:") per
+  // evitare che due nodi diversi si registrino con lo stesso id in dnd-kit; se
+  // condividessero l'id, la card intera "vincerebbe" spesso il closestCenter anche
+  // sulle singole righe step, rompendo il riordino interno alla lista.
   const { setNodeRef: setDropZoneRef, isOver } = useDroppable({
-    id: `dropzone:${objective.id}`,
-    disabled: objective.completed,
+    id: `objdrop:${objective.id}`,
+    disabled: objective.completed || isOpen,
   })
   const style = { transform: CSS.Transform.toString(transform), transition }
   function setRefs(node: HTMLDivElement | null) {
@@ -782,8 +790,8 @@ function ProjectValueDialog({ project, onSaved }: { project: Project; onSaved: (
 // Un unico DndContext per progetto copre sia il riordino degli obiettivi (drag
 // sull'handle dell'obiettivo) sia il riordino/spostamento degli step fra
 // obiettivi diversi dello stesso progetto (drag sull'handle dello step). I due
-// casi si distinguono dal prefisso dell'id ("obj:"/"step:"/"dropzone:"), quindi
-// un solo onDragEnd basta e non serve nidificare più DndContext.
+// casi si distinguono dal prefisso dell'id ("obj:"/"step:"/"dropzone:"/"objdrop:"),
+// quindi un solo onDragEnd basta e non serve nidificare più DndContext.
 function ObjectivesBoard({
   project,
   onChange,
@@ -843,6 +851,8 @@ function ObjectivesBoard({
     let overStepId: string | null = null
     if (overId.startsWith('dropzone:')) {
       targetObjectiveId = overId.slice(9)
+    } else if (overId.startsWith('objdrop:')) {
+      targetObjectiveId = overId.slice(8)
     } else if (overId.startsWith('step:')) {
       overStepId = overId.slice(5)
       targetObjectiveId = project.objectives.find((o) => o.steps.some((s) => s.id === overStepId && !s.done))?.id ?? null
