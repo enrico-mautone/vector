@@ -1,5 +1,6 @@
 {
   "buildCommand": "cd frontend && npm install && npm run build",
+  "regions": ["fra1"],
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]

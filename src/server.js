@@ -308,10 +308,15 @@ async function fetchRandomQuote() {
 }
 
 async function buildHomeData(quote) {
-  const config = await db.readConfig();
-  const log = await db.readLog();
-  const steps = await db.readSteps();
-  const objectives = await db.readObjectives();
+  // Le 4 letture sono indipendenti: partono in parallelo invece di pagare
+  // 4 round-trip DB sequenziali (pesante soprattutto quando Vercel e Neon
+  // non sono nella stessa regione).
+  const [config, log, steps, objectives] = await Promise.all([
+    db.readConfig(),
+    db.readLog(),
+    db.readSteps(),
+    db.readObjectives(),
+  ]);
   const today = todayStr();
   const todayEntry = getEntry(log, today) || { projects: {}, habits: {} };
 
@@ -397,9 +402,12 @@ app.get('/api/home', async (req, res) => {
 // giornaliero per progetto se "Non esagerare!!" è attivo.
 app.post('/api/home/complete-step', async (req, res) => {
   const { projectId, stepId } = req.body;
-  const config = await db.readConfig();
-  const log = await db.readLog();
-  const steps = await db.readSteps();
+  const [config, log, steps, objectives] = await Promise.all([
+    db.readConfig(),
+    db.readLog(),
+    db.readSteps(),
+    db.readObjectives(),
+  ]);
   const today = todayStr();
 
   const step = steps.find((s) => s.id === stepId && s.projectId === projectId && !s.done);
@@ -414,7 +422,6 @@ app.post('/api/home/complete-step', async (req, res) => {
   });
   loggedStepsByProject[projectId] = loggedStepsByProject[projectId].concat([{ stepId }]);
 
-  const objectives = await db.readObjectives();
   const activeObjective = activeObjectivesByPriority(objectives, projectId)[0];
   if (!activeObjective || step.objectiveId !== activeObjective.id) {
     return res.status(400).json({ ok: false, error: 'Questo task appartiene a un obiettivo non ancora attivo.' });
@@ -598,12 +605,11 @@ app.post('/api/steps/:id/move', async (req, res) => {
   if (!objectiveId) {
     return res.status(400).json({ ok: false, error: 'Obiettivo mancante.' });
   }
-  const steps = await db.readSteps();
+  const [steps, objectives] = await Promise.all([db.readSteps(), db.readObjectives()]);
   const step = steps.find((s) => s.id === req.params.id);
   if (!step) {
     return res.status(404).json({ ok: false, error: 'Step non trovato.' });
   }
-  const objectives = await db.readObjectives();
   const targetObjective = objectives.find((o) => o.id === objectiveId);
   if (!targetObjective || targetObjective.projectId !== step.projectId) {
     return res.status(400).json({ ok: false, error: 'Obiettivo non valido per questo progetto.' });
@@ -659,9 +665,7 @@ app.get('/api/habits', async (req, res) => {
 });
 
 app.get('/api/projects', async (req, res) => {
-  const config = await db.readConfig();
-  const steps = await db.readSteps();
-  const objectives = await db.readObjectives();
+  const [config, steps, objectives] = await Promise.all([db.readConfig(), db.readSteps(), db.readObjectives()]);
   const projects = config.projects
     .slice()
     .sort((a, b) => a.priority - b.priority)
@@ -809,8 +813,7 @@ app.post('/api/objectives/:id/edit', async (req, res) => {
 // Conferma esplicita di completamento — stesso pattern di finish-project:
 // mai automatico, e solo se non ci sono più task aperti sotto l'obiettivo.
 app.post('/api/objectives/:id/finish', async (req, res) => {
-  const objectives = await db.readObjectives();
-  const steps = await db.readSteps();
+  const [objectives, steps] = await Promise.all([db.readObjectives(), db.readSteps()]);
   const objective = objectives.find((o) => o.id === req.params.id);
   if (!objective) {
     return res.status(404).json({ ok: false, error: 'Obiettivo non trovato.' });
@@ -826,8 +829,7 @@ app.post('/api/objectives/:id/finish', async (req, res) => {
 });
 
 app.post('/api/objectives/:id/delete', async (req, res) => {
-  const objectives = await db.readObjectives();
-  const steps = await db.readSteps();
+  const [objectives, steps] = await Promise.all([db.readObjectives(), db.readSteps()]);
   const objective = objectives.find((o) => o.id === req.params.id);
   if (!objective) {
     return res.status(404).json({ ok: false, error: 'Obiettivo non trovato.' });
