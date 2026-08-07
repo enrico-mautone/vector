@@ -5,7 +5,8 @@
   "description": "Focus & habit command center (personal MVP)",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "dev": "dev.bat"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
