@@ -8,6 +8,7 @@ import {
   useDroppable,
   useSensor,
   useSensors,
+  type CollisionDetection,
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
@@ -787,6 +788,29 @@ function ProjectValueDialog({ project, onSaved }: { project: Project; onSaved: (
   )
 }
 
+// Un obiettivo "in coda" (queued) e collassato ha ENTRAMBI gli hook attivi sulla
+// stessa card (vedi setRefs in ObjectiveSection): useSortable("obj:<id>", che
+// registra internamente anche una propria droppable implicita con lo stesso id)
+// e il nostro useDroppable("objdrop:<id>") esplicito per il drop di step. Stesso
+// nodo DOM, due droppable quasi sovrapposti: durante il drag di uno STEP,
+// closestCenter() può risolvere "over" sulla droppable implicita "obj:<id>"
+// invece che su "objdrop:<id>" (nessuno dei due prefissi noti a handleDragEnd
+// per uno step drag), quindi il drop su un obiettivo in coda e collassato
+// falliva silenziosamente. Fix: una collisionDetection su misura che, in base al
+// prefisso dell'id trascinato, esclude a priori i droppable dell'altro "mondo"
+// (step vs obiettivo) invece di lasciare che closestCenter scelga fra
+// candidati ambigui sullo stesso nodo.
+const stepPrefixes = ['step:', 'dropzone:', 'objdrop:']
+const objectiveAwareCollisionDetection: CollisionDetection = (args) => {
+  const activeId = String(args.active.id)
+  const allowed = activeId.startsWith('step:') ? stepPrefixes : activeId.startsWith('obj:') ? ['obj:'] : null
+  if (!allowed) return closestCenter(args)
+  return closestCenter({
+    ...args,
+    droppableContainers: args.droppableContainers.filter((c) => allowed.some((p) => String(c.id).startsWith(p))),
+  })
+}
+
 // Un unico DndContext per progetto copre sia il riordino degli obiettivi (drag
 // sull'handle dell'obiettivo) sia il riordino/spostamento degli step fra
 // obiettivi diversi dello stesso progetto (drag sull'handle dello step). I due
@@ -876,7 +900,7 @@ function ObjectivesBoard({
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} collisionDetection={objectiveAwareCollisionDetection} onDragEnd={handleDragEnd}>
       <div className="flex justify-end">
         <AddObjectiveDialog projectId={project.id} onAdded={onChange} />
       </div>
