@@ -28,6 +28,23 @@ async function withClient(fn) {
   }
 }
 
+// Costruisce la clausola "($1,$2,...),($n+1,...)" e l'array piatto di valori
+// per un INSERT multi-riga, evitando un round-trip di rete per riga (vedi
+// writeSteps/writeObjectives/writeLog: prima di questo helper ogni write
+// riscriveva l'intera tabella con una query awaited per riga, diventando
+// visibilmente lento su Vercel/serverless già con poche centinaia di righe).
+function buildValuesClause(rows) {
+  const values = [];
+  const placeholders = rows
+    .map((row) => {
+      const start = values.length;
+      values.push(...row);
+      return `(${row.map((_, i) => `$${start + i + 1}`).join(',')})`;
+    })
+    .join(',');
+  return { placeholders, values };
+}
+
 async function initSchema() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS projects (
@@ -206,11 +223,11 @@ async function writeLog(log) {
     try {
       await client.query('BEGIN');
       await client.query('DELETE FROM log_entries');
-      for (const entry of log) {
-        await client.query(
-          'INSERT INTO log_entries (date, projects, habits) VALUES ($1,$2,$3)',
-          [entry.date, JSON.stringify(entry.projects || {}), JSON.stringify(entry.habits || {})]
+      if (log.length > 0) {
+        const { placeholders, values } = buildValuesClause(
+          log.map((entry) => [entry.date, JSON.stringify(entry.projects || {}), JSON.stringify(entry.habits || {})])
         );
+        await client.query(`INSERT INTO log_entries (date, projects, habits) VALUES ${placeholders}`, values);
       }
       await client.query('COMMIT');
     } catch (err) {
@@ -248,10 +265,13 @@ async function writeSteps(steps) {
       // steps->objectives se un'altra route tocca solo una delle due tabelle.
       const ids = steps.map((s) => s.id);
       await client.query('DELETE FROM steps WHERE id != ALL($1::text[])', [ids]);
-      for (const s of steps) {
+      if (steps.length > 0) {
+        const { placeholders, values } = buildValuesClause(
+          steps.map((s) => [s.id, s.projectId, s.objectiveId ?? null, s.text, !!s.done, s.completedAt ?? null, s.createdAt])
+        );
         await client.query(
           `INSERT INTO steps (id, project_id, objective_id, text, done, completed_at, created_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7)
+           VALUES ${placeholders}
            ON CONFLICT (id) DO UPDATE SET
              project_id = EXCLUDED.project_id,
              objective_id = EXCLUDED.objective_id,
@@ -259,7 +279,7 @@ async function writeSteps(steps) {
              done = EXCLUDED.done,
              completed_at = EXCLUDED.completed_at,
              created_at = EXCLUDED.created_at`,
-          [s.id, s.projectId, s.objectiveId ?? null, s.text, !!s.done, s.completedAt ?? null, s.createdAt]
+          values
         );
       }
       await client.query('COMMIT');
@@ -298,10 +318,13 @@ async function writeObjectives(objectives) {
       // mai un DELETE totale (violerebbe la FK steps->objectives).
       const ids = objectives.map((o) => o.id);
       await client.query('DELETE FROM objectives WHERE id != ALL($1::text[])', [ids]);
-      for (const o of objectives) {
+      if (objectives.length > 0) {
+        const { placeholders, values } = buildValuesClause(
+          objectives.map((o) => [o.id, o.projectId, o.goal, o.outcome, o.priority, !!o.completed, o.completedAt ?? null, o.createdAt])
+        );
         await client.query(
           `INSERT INTO objectives (id, project_id, goal, outcome, priority, completed, completed_at, created_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+           VALUES ${placeholders}
            ON CONFLICT (id) DO UPDATE SET
              project_id = EXCLUDED.project_id,
              goal = EXCLUDED.goal,
@@ -310,7 +333,7 @@ async function writeObjectives(objectives) {
              completed = EXCLUDED.completed,
              completed_at = EXCLUDED.completed_at,
              created_at = EXCLUDED.created_at`,
-          [o.id, o.projectId, o.goal, o.outcome, o.priority, !!o.completed, o.completedAt ?? null, o.createdAt]
+          values
         );
       }
       await client.query('COMMIT');

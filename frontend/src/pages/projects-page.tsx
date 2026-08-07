@@ -61,21 +61,33 @@ function ProjectBacklog({
 
   async function handleAdd() {
     if (!newStep.trim()) return
-    await api.addStep(projectId, objectiveId, newStep.trim())
-    setNewStep('')
-    onChange()
+    try {
+      await api.addStep(projectId, objectiveId, newStep.trim())
+      setNewStep('')
+      onChange()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Non riesco ad aggiungere lo step.")
+    }
   }
 
   async function handleBulk() {
     if (!bulkText.trim()) return
-    await api.bulkAddSteps(projectId, objectiveId, bulkText)
-    setBulkText('')
-    onChange()
+    try {
+      await api.bulkAddSteps(projectId, objectiveId, bulkText)
+      setBulkText('')
+      onChange()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Non riesco ad aggiungere gli step.")
+    }
   }
 
   async function handleToggle(id: string) {
-    await api.toggleStep(id)
-    onChange()
+    try {
+      await api.toggleStep(id)
+      onChange()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Non riesco ad aggiornare lo step.")
+    }
   }
 
   function startEdit(s: Step) {
@@ -97,8 +109,12 @@ function ProjectBacklog({
   }
 
   async function handleDelete(id: string) {
-    await api.deleteStep(id)
-    onChange()
+    try {
+      await api.deleteStep(id)
+      onChange()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Non riesco a cancellare lo step.")
+    }
   }
 
   async function handleMove(index: number, direction: -1 | 1) {
@@ -106,8 +122,12 @@ function ProjectBacklog({
     const target = index + direction
     if (target < 0 || target >= order.length) return
     ;[order[index], order[target]] = [order[target], order[index]]
-    await api.reorderSteps(projectId, order.concat(done.map((s) => s.id)))
-    onChange()
+    try {
+      await api.reorderSteps(projectId, order.concat(done.map((s) => s.id)))
+      onChange()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Non riesco a riordinare gli step.")
+    }
   }
 
   // targetId=null significa "rilascia in fondo alla lista" (drop sul contenitore,
